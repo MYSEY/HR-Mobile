@@ -39,6 +39,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     return Scaffold(
       // backgroundColor: Colors.blue,
       // backgroundColor: Colors.red,
+      backgroundColor: Color(0xFF006D77),
       body: Center(
         child: Form(
           key: _formKey,

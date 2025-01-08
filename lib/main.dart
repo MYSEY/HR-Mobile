@@ -1,3 +1,4 @@
+import 'package:app/screens/leaves/leave_list_new.dart';
 import 'package:app/screens/login_page.dart';
 import 'package:app/screens/motor_rentals/motor_rental.dart';
 import 'package:app/screens/motor_rentals/payment_history.dart';
@@ -21,6 +22,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 
 import 'package:app/screens/setting/change_password.dart';
 import 'package:app/screens/setting/edit_profile.dart';
+import 'package:app/models/leave_request.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,11 +56,17 @@ class MyApp extends StatelessWidget {
         '/change/password': (context) => ChangePasswordPage(),
         '/edit/profile': (context) => EditProfilePage(),
         '/public/holiday': (context) => PublicHolidaysPage(),
-        '/leaves/list': (context) => LeaveRequestPage(),
+        // '/leaves/admin': (context) => adminAttendancePage(),
+        // '/leaves/list': (context) => LeaveRequestPage(),
+        '/leaves/list': (context) {
+          final args = ModalRoute.of(context)?.settings.arguments as bool;
+          return LeaveRequestPage(viewApprove: args);
+        },
         '/leaves/create': (context) => FormRequestLeavePage(),
         '/leaves/edit': (context) {
-          final args = ModalRoute.of(context)?.settings.arguments as String;
-          return EditRequestLeavePage(id: args);
+          final args =
+              ModalRoute.of(context)?.settings.arguments as LeaveRequest;
+          return EditRequestLeavePage(leaveRequest: args);
         },
         '/employees': (context) => EmployeeListPage(),
         // '/employee/edit': (context) {

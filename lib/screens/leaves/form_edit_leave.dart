@@ -1,147 +1,409 @@
+import 'dart:convert';
+
 import 'package:app/models/leave_request.dart';
+import 'package:app/providers/leave_request_provider.dart';
+import 'package:app/providers/public_holiday_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:app/providers/auth_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:app/models/leave_request.dart';
+import 'dart:async';
 
-class EditRequestLeavePage extends StatelessWidget {
-  final String id;
-  EditRequestLeavePage({required this.id});
+import 'package:shared_preferences/shared_preferences.dart';
 
-  final TextEditingController leaveTypeController =
-      TextEditingController(text: "Sick Leave");
-  final TextEditingController startDateController =
-      TextEditingController(text: "2024-11-25");
-  final TextEditingController endDateController =
-      TextEditingController(text: "2024-11-25");
-  final TextEditingController leaveReasonController =
-      TextEditingController(text: "bc");
-  final String handoverStaff = "My Sey"; // Example pre-selected value
-  final String delegate = ""; // Example pre-selected value
+class EditRequestLeavePage extends ConsumerStatefulWidget {
+  final LeaveRequest leaveRequest;
+
+  const EditRequestLeavePage({Key? key, required this.leaveRequest})
+      : super(key: key);
+
+  @override
+  _RequestLeavePageState createState() =>
+      _RequestLeavePageState(leaveRequest: leaveRequest);
+}
+
+class _RequestLeavePageState extends ConsumerState<EditRequestLeavePage> {
+  final LeaveRequest leaveRequest;
+  _RequestLeavePageState({Key? key, required this.leaveRequest});
+
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  String? _leaveType;
+  DateTime? _startDate;
+  DateTime? _endDate;
+  bool _isHalfDay = false;
+  String? _halfDaySession;
+  String? _startDaySession;
+  String? _endDaySession;
+  String? _reason;
+  double _numberOfDays = 0;
+  double totalDays = 0;
+  String? _handoverStaff;
+  String? _delegate;
+  bool? viewApprove = false;
+
+  int countWeekdays(DateTime startDate, DateTime endDate) {
+    int totalDays = 0;
+    DateTime currentDate = startDate;
+
+    while (!currentDate.isAfter(endDate)) {
+      int dayOfWeek = currentDate.weekday; // 1 for Monday, 7 for Sunday
+      if (dayOfWeek != DateTime.saturday && dayOfWeek != DateTime.sunday) {
+        totalDays++;
+      }
+      currentDate = currentDate.add(Duration(days: 1));
+    }
+
+    return totalDays;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getToken();
+    ref.read(leaveProvider.notifier).fetchEmployeeLeaves();
+    if (leaveRequest != null) {
+      _leaveType = leaveRequest.leaveTypeId.toString();
+      _handoverStaff = leaveRequest.handoverStaffId.toString();
+      _delegate = leaveRequest.delegate?.delegate_id.toString();
+      _startDate = leaveRequest.startDate;
+      _endDate = leaveRequest.endDate;
+      final numberOfDay = leaveRequest.numberOfDay.toString();
+      _numberOfDays = double.parse(numberOfDay);
+      _reason = leaveRequest.reason;
+    }
+    _isHalfDay =
+        (leaveRequest.startHalfDay != null || leaveRequest.endHalfDay != null);
+    totalDays =
+        leaveRequest.endDate!.difference(leaveRequest.startDate!).inDays + 1;
+    if (_isHalfDay && totalDays == 1) {
+      _halfDaySession = leaveRequest.startHalfDay;
+    }
+    if (_isHalfDay && totalDays > 1) {
+      if (leaveRequest.startHalfDay != "" &&
+          leaveRequest.startHalfDay != null) {
+        _startDaySession = leaveRequest.startHalfDay;
+      }
+      if (leaveRequest.endHalfDay != "" && leaveRequest.endHalfDay != null) {
+        _endDaySession = leaveRequest.endHalfDay;
+      }
+    }
+  }
+
+  Future<void> _getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final roleString = prefs.getString('role');
+
+    if (roleString != null) {
+      final role = jsonDecode(roleString); // Convert the JSON string to a Map
+      final permission = role['Permission'];
+      var result = permission.firstWhere(
+        (perm) => perm["name"] == "lang.leaves_admin" && perm["is_view"] == 1,
+        orElse: () => null, // Return null if no match is found
+      );
+      if (result != null) {
+        viewApprove = true;
+      }
+    } else {
+      print("Role not found in SharedPreferences.");
+    }
+  }
+
+  Future<void> _selectDate(BuildContext context, bool isStartDate) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2101),
+      selectableDayPredicate: (DateTime day) {
+        // Disable Saturdays (6) and Sundays (7)
+        return day.weekday != DateTime.saturday &&
+            day.weekday != DateTime.sunday;
+      },
+    );
+    if (picked != null) {
+      setState(() {
+        if (isStartDate) {
+          _startDate = picked;
+        } else {
+          _endDate = picked;
+        }
+        _isHalfDay = false;
+        _halfDaySession = null;
+        _startDaySession = null;
+        _endDaySession = null;
+        _calculateNumberOfDays();
+      });
+    }
+  }
+
+  Future<void> _calculateNumberOfDays() async {
+    if (_startDate != null && _endDate != null) {
+      int totalDays = countWeekdays(_startDate!, _endDate!);
+
+      // Fetch public holidays from API
+      await ref.read(publicHolidayProvider.notifier).fetchSearchHolidays(
+            fromDate: _startDate,
+            toDate: _endDate,
+          );
+
+      final holidays = ref.read(publicHolidayProvider);
+      // Count weekdays that fall within public holidays
+      int holidayWeekdays = 0;
+      for (var holiday in holidays) {
+        holidayWeekdays += countWeekdays(holiday.from, holiday.to!);
+      }
+
+      // Adjust total days by removing holidays
+      int totalWorkDays = totalDays - holidayWeekdays;
+
+      // Adjust for half-day selections
+      double adjustedDays = totalWorkDays.toDouble();
+      if (_isHalfDay && totalWorkDays == 1) {
+        adjustedDays = 0.5;
+      }
+      if (_startDaySession != null) {
+        adjustedDays -= 0.5;
+      }
+      if (_endDaySession != null) {
+        adjustedDays -= 0.5;
+      }
+
+      setState(() {
+        _numberOfDays = adjustedDays;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final leaveState = ref.watch(leaveProvider);
+    final delegates = leaveState.delegates;
+    final employee = leaveState.employee;
+    final leaveTypes = leaveState.leaveTypes;
     return Scaffold(
       appBar: AppBar(
         title: Text(
           "Edit Leave Request",
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: Colors.red,
+        backgroundColor: Color(0xFF006D77),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
+          color: Colors.white,
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pushReplacementNamed(context, '/leaves/list',
+                arguments: viewApprove);
           },
         ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        child: Form(
+          key: _formKey,
+          child: ListView(
             children: [
-              // Leave Type Dropdown
-              Text("Leave Type *"),
               DropdownButtonFormField<String>(
-                value: leaveTypeController.text,
-                items: [
-                  DropdownMenuItem(
-                      value: "Sick Leave", child: Text("Sick Leave")),
-                  DropdownMenuItem(
-                      value: "Casual Leave", child: Text("Casual Leave")),
-                  DropdownMenuItem(
-                      value: "Annual Leave", child: Text("Annual Leave")),
-                ],
+                value: leaveRequest?.leaveTypeId?.toString(),
+                decoration: InputDecoration(labelText: 'Leave Type *'),
+                items: leaveTypes.map((type) {
+                  return DropdownMenuItem<String>(
+                    value: type.id?.toString(),
+                    child: Text(type.name),
+                  );
+                }).toList(),
                 onChanged: (value) {
-                  leaveTypeController.text = value!;
+                  setState(() {
+                    _leaveType = value;
+                  });
+                },
+                validator: (value) =>
+                    value == null ? 'Please select a leave type' : null,
+              ),
+              SizedBox(height: 16.0),
+              TextFormField(
+                readOnly: true,
+                decoration: InputDecoration(labelText: 'Start Date *'),
+                controller: TextEditingController(
+                    text: _startDate == null
+                        ? ''
+                        : DateFormat('yyyy-MM-dd').format(_startDate!)),
+                onTap: () => _selectDate(context, true),
+                validator: (value) =>
+                    _startDate == null ? 'Please select a start date' : null,
+              ),
+              SizedBox(height: 16.0),
+              TextFormField(
+                readOnly: true,
+                decoration: InputDecoration(labelText: 'End Date *'),
+                controller: TextEditingController(
+                    text: _endDate == null
+                        ? ''
+                        : DateFormat('yyyy-MM-dd').format(_endDate!)),
+                onTap: () => _selectDate(context, false),
+                validator: (value) =>
+                    _endDate == null ? 'Please select an end date' : null,
+              ),
+              CheckboxListTile(
+                title: Text('Half Day'),
+                value: _isHalfDay,
+                onChanged: (value) {
+                  if (value == false) {
+                    _startDaySession = null;
+                    _endDaySession = null;
+                  }
+                  setState(() {
+                    _isHalfDay = value ?? false;
+                    _calculateNumberOfDays();
+                  });
                 },
               ),
-              SizedBox(height: 16),
-              // Start Date
-              Text("Start Date *"),
-              TextFormField(
-                controller: startDateController,
-                decoration: InputDecoration(hintText: "YYYY-MM-DD"),
-                keyboardType: TextInputType.datetime,
-              ),
-              SizedBox(height: 16),
-              // End Date
-              Text("End Date *"),
-              TextFormField(
-                controller: endDateController,
-                decoration: InputDecoration(hintText: "YYYY-MM-DD"),
-                keyboardType: TextInputType.datetime,
-              ),
-              SizedBox(height: 16),
-              // Half Day Checkbox
-              Row(
-                children: [
-                  Checkbox(
-                    value: false,
-                    onChanged: (value) {
-                      // Handle checkbox toggle
-                    },
-                  ),
-                  Text("Half Day"),
-                ],
-              ),
-              SizedBox(height: 16),
-              // Handover Staff Dropdown
-              Text("Handover Staff"),
-              DropdownButtonFormField<String>(
-                value: handoverStaff,
-                items: [
-                  DropdownMenuItem(value: "My Sey", child: Text("My Sey")),
-                  DropdownMenuItem(
-                      value: "Other Staff", child: Text("Other Staff")),
-                ],
-                onChanged: (value) {
-                  // Handle selection change
-                },
-              ),
-              SizedBox(height: 16),
-              // Delegate Dropdown
-              Text("Delegate"),
-              DropdownButtonFormField<String>(
-                value: delegate,
-                items: [
-                  DropdownMenuItem(value: "", child: Text("None")),
-                  DropdownMenuItem(value: "John Doe", child: Text("John Doe")),
-                ],
-                onChanged: (value) {
-                  // Handle selection change
-                },
-              ),
-              SizedBox(height: 16),
-              // Leave Reason
-              Text("Leave Reason *"),
-              TextFormField(
-                controller: leaveReasonController,
-                maxLines: 3,
-                decoration: InputDecoration(
-                  hintText: "Enter reason for leave",
+              if (_isHalfDay && _numberOfDays < 1)
+                DropdownButtonFormField<String>(
+                  value: _halfDaySession,
+                  decoration: InputDecoration(labelText: 'Select Half Day'),
+                  items: ['AM', 'PM'].map((session) {
+                    return DropdownMenuItem<String>(
+                      value: session,
+                      child: Text(session),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _halfDaySession = value;
+                      _calculateNumberOfDays();
+                    });
+                  },
+                  validator: (value) => _isHalfDay && _halfDaySession == null
+                      ? 'Please select an AM and PM'
+                      : null,
                 ),
-              ),
-              SizedBox(height: 32),
-              // Save Changes Button
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Handle save changes logic
+              if (_isHalfDay && totalDays > 1)
+                Column(
+                  children: [
+                    DropdownButtonFormField<String>(
+                      value: _startDaySession,
+                      decoration: InputDecoration(labelText: 'Start Day'),
+                      items: ['AM', 'PM'].map((session) {
+                        return DropdownMenuItem<String>(
+                          value: session,
+                          child: Text(session),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _startDaySession = value;
+                          _calculateNumberOfDays();
+                        });
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                      ),
-                      child: Text(
-                        'Submit Request',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white,
-                        ),
-                      ),
                     ),
-                  ),
-                ],
+                    DropdownButtonFormField<String>(
+                      value: _endDaySession,
+                      decoration: InputDecoration(labelText: 'End Day'),
+                      items: ['AM', 'PM'].map((session) {
+                        return DropdownMenuItem<String>(
+                          value: session,
+                          child: Text(session),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _endDaySession = value;
+                          _calculateNumberOfDays();
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              SizedBox(height: 16.0),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Number of Days'),
+                readOnly: true,
+                controller:
+                    TextEditingController(text: _numberOfDays.toString()),
               ),
+              SizedBox(height: 16.0),
+              DropdownButtonFormField<String>(
+                value: leaveRequest.handoverStaffId?.toString(),
+                decoration: InputDecoration(labelText: 'Handover Staff'),
+                items: employee.map((emp) {
+                  return DropdownMenuItem<String>(
+                    value: emp.iD?.toString(),
+                    child: Text(emp.employeeNameEn),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _handoverStaff = value;
+                  });
+                },
+              ),
+              SizedBox(height: 16.0),
+              DropdownButtonFormField<String>(
+                value: _delegate,
+                decoration: InputDecoration(labelText: 'Delegate'),
+                items: delegates.map((emp) {
+                  return DropdownMenuItem<String>(
+                    value: emp.iD?.toString(),
+                    child: Text(emp.employeeNameEn),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _delegate = value;
+                  });
+                },
+              ),
+              SizedBox(height: 16.0),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Leave Reason *'),
+                controller: TextEditingController(text: _reason.toString()),
+                maxLines: 3,
+                validator: (value) =>
+                    value!.isEmpty ? 'Please provide a reason for leave' : null,
+                onChanged: (value) {
+                  _reason = value;
+                },
+              ),
+              SizedBox(height: 20.0),
+              ElevatedButton(
+                onPressed: () async {
+                  if (_isHalfDay != false && _halfDaySession == "AM") {
+                    _startDaySession = _halfDaySession;
+                  }
+                  if (_isHalfDay != false && _halfDaySession == "PM") {
+                    _endDaySession = _halfDaySession;
+                  }
+                  if (_formKey.currentState!.validate()) {
+                    // Create the LeaveRequest object with form values
+                    LeaveRequest request = LeaveRequest(
+                      id: leaveRequest.id,
+                      leaveTypeId: int.tryParse(_leaveType ?? ""),
+                      startDate: _startDate ?? DateTime.now(),
+                      endDate: _endDate ?? DateTime.now(),
+                      startHalfDay: _startDaySession,
+                      endHalfDay: _endDaySession,
+                      reason: _reason,
+                      numberOfDay: _numberOfDays.toString(),
+                      handoverStaffId: int.tryParse(_handoverStaff ?? ""),
+                      delegateId: int.tryParse(_delegate ?? ""),
+                    );
+                    await ref
+                        .read(leaveProvider.notifier)
+                        .updateRequestLeave(request, context);
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                ),
+                child: Text(
+                  'Edit Request',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
+                ),
+              )
             ],
           ),
         ),

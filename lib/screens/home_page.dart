@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,17 +15,25 @@ class MyApp extends StatelessWidget {
 }
 
 class HomePage extends StatefulWidget {
-  // Changed to StatefulWidget
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-// class HomePage extends StatelessWidget {
   String? employeeNameEn;
   String? email;
   String? position;
   String? location;
+  var menus = [
+    {'icon': Icons.settings, 'label': 'Settings', 'route': '/setting'},
+    {'icon': Icons.attach_money, 'label': 'Salary', 'route': '/salaries'},
+    {
+      'icon': Icons.event,
+      'label': 'Public Holidays',
+      'route': '/public/holiday'
+    },
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -35,13 +42,52 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
+    final roleString = prefs.getString('role');
+
+    if (roleString != null) {
+      final role = jsonDecode(roleString); // Convert the JSON string to a Map
+      final permission = role['Permission'];
+
+      if (permission != null) {
+        // Loop through permissions and add to menus
+        bool viewApprove = false;
+        for (var perm in permission) {
+          if (perm['name'] == "lang.leaves_admin" && perm['is_view'] == 1) {
+            viewApprove = true;
+          }
+          if (perm['name'] == "lang.leaves_employee" && perm['is_view'] == 1) {
+            menus.add({
+              'icon': Icons.exit_to_app,
+              'label': 'Leaves',
+              'route': '/leaves/list',
+              'arguments': viewApprove,
+            });
+          }
+          if (perm['name'] == "lang.motor_rental" && perm['is_view'] == 1) {
+            menus.add({
+              'icon': Icons.commute,
+              'label': 'Motor & Tablet',
+              'route': '/motor/list',
+            });
+          }
+          if (perm['name'] == "lang.training" && perm['is_view'] == 1) {
+            menus.add({
+              'icon': Icons.book,
+              'label': 'Training',
+              'route': '/trainings',
+            });
+          }
+        }
+      }
+    } else {
+      print("Role not found in SharedPreferences.");
+    }
     // Get the JSON string from SharedPreferences
     String? employeeJson = prefs.getString('employee');
     if (employeeJson != null) {
       // Decode the JSON string to a map
       Map<String, dynamic> employee = jsonDecode(employeeJson);
-      print("employee $employee");
-      // Set the employee_name_en value to be displayed
+      // Set the employee details to be displayed
       setState(() {
         employeeNameEn = employee['employee_name_en'];
         email = employee['email'] ?? "";
@@ -51,171 +97,141 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(""),
-        // backgroundColor: Colors.blue,
-        backgroundColor: Colors.red,
-        actions: [
-          IconButton(
-              icon: Icon(Icons.notifications, color: Colors.white),
-              onPressed: () {}),
-          IconButton(
-            icon: Icon(Icons.settings, color: Colors.white),
-            onPressed: () {
-              Navigator.pushReplacementNamed(context, '/setting');
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Profile Header Section
-          Container(
-            padding: EdgeInsets.all(16.0),
-            color: Colors.red,
-            // color: Colors.blue,
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundImage: NetworkImage(
-                      "https://example.com/user_image.jpg"), // Replace with actual image URL
+      backgroundColor: Color(0xFF006D77), // Background color
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header Section
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        // Profile image (optional, can be updated later)
+                        backgroundImage: AssetImage('assets/icon/logo.png'),
+                        radius: 30,
+                      ),
+                      SizedBox(width: 8),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Hello, ${employeeNameEn ?? 'User'}!", // Default value if null
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Icon(Icons.chat_bubble_outline, color: Colors.white),
+                      SizedBox(width: 16),
+                      Icon(Icons.notifications_none, color: Colors.white),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            // Account Card
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(71, 24, 23, 23),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Column(
                   children: [
-                    Text(
-                      employeeNameEn!,
-                      style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 8),
-                    Row(
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //   children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(Icons.email, size: 16, color: Colors.white70),
-                        SizedBox(width: 8),
                         Text(
-                          email!,
-                          style: TextStyle(color: Colors.white70),
+                          "Email: ${email ?? 'N/A'}", // Default value if null
+                          style: TextStyle(color: Colors.white70, fontSize: 14),
+                        ),
+                        Text(
+                          "Position: ${position ?? 'N/A'}", // Default value if null
+                          style: TextStyle(color: Colors.white70, fontSize: 14),
+                        ),
+                        Text(
+                          "Location: ${location ?? 'N/A'}", // Default value if null
+                          style: TextStyle(color: Colors.white70, fontSize: 14),
                         ),
                       ],
-                    ),
-                    Row(
-                      children: [
-                        Icon(Icons.person, size: 16, color: Colors.white70),
-                        SizedBox(width: 8),
-                        Text(
-                          "position: $position",
-                          style: TextStyle(color: Colors.white70),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Icon(Icons.location_on,
-                            size: 16, color: Colors.white70),
-                        SizedBox(width: 8),
-                        Text(
-                          "Location: $location",
-                          style: TextStyle(color: Colors.white70),
-                        ),
-                      ],
+                      //   ),
+                      // ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
-          ),
 
-          SizedBox(height: 16),
-
-          // Menu Options Section
-          Expanded(
-            child: GridView.count(
-              crossAxisCount: 2,
-              padding: EdgeInsets.all(16),
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              children: [
-                // _buildMenuCard(Icons.settings, "Settings", context),
-                _buildMenuCard(Icons.attach_money, "Salary", context),
-                _buildMenuCard(Icons.event, "Public Holidays", context),
-                _buildMenuCard(
-                    Icons.calendar_view_day, "Leave Request", context),
-                _buildMenuCard(Icons.book, "Training", context),
-                _buildMenuCard(Icons.commute, "Motor & Tablet", context),
-              ],
+            // Grid Section
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: GridView.count(
+                  crossAxisCount: 3, // Number of columns
+                  mainAxisSpacing: 16, // Spacing between rows
+                  crossAxisSpacing: 16, // Spacing between columns
+                  children: menus.map((item) {
+                    return GestureDetector(
+                      onTap: () {
+                        final route = item['route'] as String?;
+                        final arguments = item['arguments'] as bool?;
+                        if (route != null) {
+                          if (route == "/leaves/list") {
+                            Navigator.pushReplacementNamed(context, route,
+                                arguments: arguments);
+                          } else {
+                            Navigator.pushReplacementNamed(context, route);
+                          }
+                        }
+                      },
+                      child: Column(
+                        children: [
+                          CircleAvatar(
+                            radius: 40,
+                            backgroundColor: Colors.teal[300],
+                            child: Icon(
+                              item['icon'] as IconData,
+                              color: Colors.white,
+                              size: 35,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            item['label'] as String,
+                            textAlign: TextAlign.center,
+                            style:
+                                TextStyle(color: Colors.white70, fontSize: 14),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
             ),
-          ),
-
-          // Footer Section
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            color: Colors.black12,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildTimeInfo("In Time", "8:00 AM"),
-                _buildTimeInfo("Out Time", "5:00 PM"),
-                _buildTimeInfo("Break Time", "1 hr"),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMenuCard(IconData icon, String title, BuildContext context) {
-    return InkWell(
-      onTap: () {
-        if (title == "Leave Request") {
-          Navigator.pushReplacementNamed(context, '/leaves/list');
-        }
-        if (title == "Settings") {
-          Navigator.pushReplacementNamed(context, '/setting');
-        }
-        if (title == "Training") {
-          Navigator.pushReplacementNamed(context, '/trainings');
-        }
-        if (title == "Salary") {
-          Navigator.pushReplacementNamed(context, '/salaries');
-        }
-        if (title == "Public Holidays") {
-          Navigator.pushReplacementNamed(context, '/public/holiday');
-        }
-        if (title == "Motor & Tablet") {
-          Navigator.pushReplacementNamed(context, '/motor/list');
-        }
-      },
-      child: Card(
-        elevation: 4,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Icon(icon, size: 48, color: Colors.blue),
-            Icon(icon, size: 48, color: Colors.red),
-            SizedBox(height: 16),
-            Text(title, style: TextStyle(fontSize: 18)),
           ],
         ),
       ),
-    );
-  }
-
-  // Function to build time information in footer
-  Widget _buildTimeInfo(String label, String time) {
-    return Column(
-      children: [
-        Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
-        SizedBox(height: 4),
-        Text(time),
-      ],
     );
   }
 }

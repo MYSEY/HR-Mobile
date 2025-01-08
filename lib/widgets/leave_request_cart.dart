@@ -1,7 +1,12 @@
+import 'package:app/models/leave_request.dart';
+import 'package:app/providers/leave_request_provider.dart';
+import 'package:app/widgets/CommonUtils/show_confirmation_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class LeaveRequestCard extends StatelessWidget {
+class LeaveRequestCard extends ConsumerWidget {
+  final LeaveRequest leaveRequest;
   final String id;
   final String applicationType;
   final DateTime startDate;
@@ -10,6 +15,7 @@ class LeaveRequestCard extends StatelessWidget {
   final String status;
 
   LeaveRequestCard({
+    required this.leaveRequest,
     required this.id,
     required this.applicationType,
     required this.startDate,
@@ -19,7 +25,7 @@ class LeaveRequestCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     Color statusColor = Colors.grey;
     final String statusText;
     switch (status) {
@@ -60,7 +66,7 @@ class LeaveRequestCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "${DateFormat('yyyy-MMM-dd').format(startDate)} - ${DateFormat('yyyy-MMM-dd').format(endDate)}",
+              "${DateFormat('dd-MMM-yyyy').format(startDate)} - ${DateFormat('dd-MMM-yyyy').format(endDate)}",
               style: TextStyle(fontSize: 16, color: Colors.black),
             ),
             Text(
@@ -74,13 +80,14 @@ class LeaveRequestCard extends StatelessWidget {
           ],
         ),
         trailing: status == "pending"
-            ? _buildStatusBadge(context, id)
+            ? _buildStatusBadge(context, ref, leaveRequest)
             : SizedBox.shrink(),
       ),
     );
   }
 
-  Widget _buildStatusBadge(BuildContext context, id) {
+  Widget _buildStatusBadge(
+      BuildContext context, WidgetRef ref, LeaveRequest leaveRequest) {
     return Row(
       mainAxisSize: MainAxisSize
           .min, // To ensure the Row wraps tightly around its children
@@ -88,16 +95,37 @@ class LeaveRequestCard extends StatelessWidget {
         IconButton(
           icon: Icon(Icons.edit),
           onPressed: () {
-            Navigator.pushNamed(context, '/leaves/edit', arguments: id);
-            // Handle edit action
-            // Navigator.pushNamed(context, '/employee/edit', arguments: leaverequest);
+            Navigator.pushNamed(context, '/leaves/edit',
+                arguments: leaveRequest);
           },
         ),
         IconButton(
           icon: Icon(Icons.delete),
-          onPressed: () {
-            // Handle delete action
-            // Show a confirmation dialog before deleting
+          onPressed: () async {
+            final title = "Confirm Deletion";
+            final subtitle =
+                "Are you sure you want to delete this leave request?";
+            final result = await showConfirmationDialog(
+              context: context,
+              title: title,
+              subtitle: subtitle,
+            );
+            if (result != null && result['confirmed'] == true) {
+              try {
+                await ref
+                    .read(leaveProvider.notifier)
+                    .deleteRequestLeave(leaveRequest, context);
+              } catch (e) {
+                print("dare: $e");
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text("Failed to delete leave request: $e"),
+                    duration: Duration(seconds: 3),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            }
           },
         ),
       ],

@@ -21,6 +21,7 @@ class _EmployeeListPageState extends ConsumerState<EmployeeListPage> {
     final employees = ref.watch(employeeProvider);
 
     return Scaffold(
+      backgroundColor: Color(0xFF006D77),
       appBar: AppBar(
         title: Text('Employee List'),
       ),

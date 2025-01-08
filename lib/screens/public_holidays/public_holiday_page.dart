@@ -25,8 +25,7 @@ class _PublicHolidaysPageState extends ConsumerState<PublicHolidaysPage> {
         title: const Text("Public Holidays",
             style: TextStyle(color: Colors.white)),
         centerTitle: true,
-        // backgroundColor: Colors.blue,
-        backgroundColor: Colors.red,
+        backgroundColor: Color(0xFF006D77),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {

@@ -5,6 +5,7 @@ class LeaveRequest {
   final int? requestTo;
   final int? lineManagerId;
   final int? handoverStaffId;
+  final int? delegateId;
   final DateTime startDate;
   final String? startHalfDay;
   final DateTime endDate;
@@ -20,11 +21,14 @@ class LeaveRequest {
   final String? totalUnpaidLeave;
   final String? totalLongSickLeave;
   final String? reason;
-  final String? remark;
+  String? remark;
   final int? createdBy;
   final int? updatedBy;
   final DateTime? deletedAt;
   final LeaveType? leaveType;
+  final User? user;
+  final User? handoverStaff;
+  final Delegate? delegate;
 
   LeaveRequest({
     this.id,
@@ -33,6 +37,7 @@ class LeaveRequest {
     this.requestTo,
     this.lineManagerId,
     this.handoverStaffId,
+    this.delegateId,
     required this.startDate,
     this.startHalfDay,
     required this.endDate,
@@ -53,6 +58,9 @@ class LeaveRequest {
     this.updatedBy,
     this.deletedAt,
     this.leaveType,
+    this.user,
+    this.handoverStaff,
+    this.delegate,
   });
 
   // Factory method for creating an instance from a JSON object
@@ -87,22 +95,53 @@ class LeaveRequest {
       deletedAt: json['deleted_at'] != null
           ? DateTime.parse(json['deleted_at'])
           : null,
-      leaveType: LeaveType.fromJson(json['Leave Type']),
+      leaveType: json['leaveType'] != null
+          ? LeaveType.fromJson(json['leaveType'])
+          : null,
+      user: json['User'] != null ? User.fromJson(json['User']) : null,
+      handoverStaff: json['HandoverStaff'] != null
+          ? User.fromJson(json['HandoverStaff'])
+          : null,
+      delegate: json['DelegateLeave'] != null
+          ? Delegate.fromJson(json['DelegateLeave'])
+          : null,
     );
   }
 
   // Method to convert an instance to a JSON object
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'leave_type_id': leaveTypeId,
       'handover_staff_id': handoverStaffId,
+      'delegate_id': delegateId,
       'start_date': startDate.toIso8601String(),
       'start_half_day': startHalfDay ?? '',
       'end_date': endDate.toIso8601String(),
       'end_half_day': endHalfDay ?? '',
       'number_of_day': numberOfDay,
-      'reason': reason,
+      'reason': reason ?? '',
+      'remark': remark ?? '',
     };
+  }
+
+  @override
+  String toString() {
+    return 'LeaveRequest('
+        'id: $id,'
+        'leaveTypeId: $leaveTypeId,'
+        'handoverStaffId: $handoverStaffId,'
+        'delegate: $delegate,'
+        'startDate: $startDate,'
+        'startHalfDay: $startHalfDay,'
+        'endDate: $endDate,'
+        'endHalfDay: $endHalfDay,'
+        'numberOfDay: $numberOfDay,'
+        'reason: $reason,'
+        'remark: $remark,'
+        'leaveType: $leaveType,'
+        'user: $user,'
+        ')';
   }
 }
 
@@ -113,6 +152,57 @@ class LeaveType {
 
   factory LeaveType.fromJson(Map<String, dynamic> json) {
     return LeaveType(name: json['name']);
+  }
+  @override
+  String toString() {
+    return 'LeaveTypes('
+        'name: $name,'
+        ')';
+  }
+}
+
+class Delegate {
+  final int requester_id;
+  final int delegate_id;
+
+  Delegate({
+    required this.requester_id,
+    required this.delegate_id,
+  });
+
+  factory Delegate.fromJson(Map<String, dynamic> json) {
+    return Delegate(
+        requester_id: json['requester_id'], delegate_id: json['delegate_id']);
+  }
+  @override
+  String toString() {
+    return 'Delegate('
+        'requester_id: $requester_id,'
+        'delegate_id: $delegate_id,'
+        ')';
+  }
+}
+
+class User {
+  final String employee_name_kh;
+  final String employee_name_en;
+
+  User({
+    required this.employee_name_kh,
+    required this.employee_name_en,
+  });
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+        employee_name_kh: json['employee_name_kh'],
+        employee_name_en: json['employee_name_en']);
+  }
+  @override
+  String toString() {
+    return 'User('
+        'employeeNameKh: $employee_name_kh,'
+        'employeeNameEn: $employee_name_en,'
+        ')';
   }
 }
 
@@ -150,39 +240,39 @@ class LeaveTypes {
 }
 
 class LeaveAllocation {
-  final int id;
-  final int employeeId;
-  final String totalAnnualLeave;
-  final String totalSickLeave;
-  final String totalSpecialLeave;
-  final String totalUnpaidLeave;
-  final String defaultAnnualLeave;
-  final String defaultSickLeave;
-  final String defaultSpecialLeave;
-  final String defaultUnpaidLeave;
-  final String year1;
-  final String year2;
-  final String year3;
+  final int? id;
+  final int? employeeId;
+  final String? totalAnnualLeave;
+  final String? totalSickLeave;
+  final String? totalSpecialLeave;
+  final String? totalUnpaidLeave;
+  final String? defaultAnnualLeave;
+  final String? defaultSickLeave;
+  final String? defaultSpecialLeave;
+  final String? defaultUnpaidLeave;
+  final String? year1;
+  final String? year2;
+  final String? year3;
 
   LeaveAllocation({
-    required this.id,
-    required this.employeeId,
-    required this.totalAnnualLeave,
-    required this.totalSickLeave,
-    required this.totalSpecialLeave,
-    required this.totalUnpaidLeave,
-    required this.defaultAnnualLeave,
-    required this.defaultSickLeave,
-    required this.defaultSpecialLeave,
-    required this.defaultUnpaidLeave,
-    required this.year1,
-    required this.year2,
-    required this.year3,
+    this.id,
+    this.employeeId,
+    this.totalAnnualLeave,
+    this.totalSickLeave,
+    this.totalSpecialLeave,
+    this.totalUnpaidLeave,
+    this.defaultAnnualLeave,
+    this.defaultSickLeave,
+    this.defaultSpecialLeave,
+    this.defaultUnpaidLeave,
+    this.year1,
+    this.year2,
+    this.year3,
   });
 
   factory LeaveAllocation.fromJson(Map<String, dynamic> json) {
     return LeaveAllocation(
-      id: json['id'],
+      id: json['id'] as int?,
       employeeId: json['employee_id'],
       totalAnnualLeave: json['total_annual_leave'],
       totalSickLeave: json['total_sick_leave'],

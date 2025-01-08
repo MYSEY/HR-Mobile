@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:app/screens/home_page.dart';
+import 'package:app/widgets/CommonUtils/common_util.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,14 +41,9 @@ class AuthNotifier extends StateNotifier<bool> {
         await prefs.setString('role', roleJson);
         String employeeJson = jsonEncode(employee);
         await prefs.setString('employee', employeeJson);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Login successfully.'),
-            duration: Duration(seconds: 2),
-            backgroundColor: Colors.green,
-          ),
-        );
+        // ignore: use_build_context_synchronously
+        CommonUtils.showTopSnackbar(
+            context, 'Login successfully', Colors.green);
 
         // prefs.setString('role', role);
         state = true;

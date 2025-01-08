@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:app/widgets/CommonUtils/common_util.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
@@ -16,9 +17,6 @@ class ApiService {
 
   Future<Response> login(String user, String pass) async {
     try {
-      // Define the request URL
-      // var url = 'http://localhost:9876/api/auth/login'; // Change this to 'http://10.0.2.2:9876/api/auth/login' for Android emulator
-
       // Create the data object (same as the -d flag in curl)
       var data = {
         "number_employee": user,
@@ -138,6 +136,23 @@ class ApiService {
     }
   }
 
+  Future<Response> getLeaveApproves() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    try {
+      return await _dio.get(
+        '/leave/request/view-by-id',
+        options: Options(
+          headers: {
+            'Authorization': 'bearer $token',
+          },
+        ),
+      );
+    } catch (e) {
+      throw Exception('Failed to load leave approve: $e');
+    }
+  }
+
   Future<Response> getEmployeeLeaves() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
@@ -155,7 +170,8 @@ class ApiService {
     }
   }
 
-  Future<Response> createRequestLeave(Map<String, dynamic> data) async {
+  Future<Response> createRequestLeave(
+      Map<String, dynamic> data, BuildContext context) async {
     // Encode credentials for Basic Authentication
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
@@ -170,8 +186,98 @@ class ApiService {
           },
         ),
       );
+    } on DioException catch (dioError) {
+      final messageEroor = dioError.response?.data;
+      CommonUtils.showTopSnackbar(
+          context, '${messageEroor["error"]}', Colors.red);
+
+      throw Exception('Error creating leave request: $dioError');
+    }
+  }
+
+  Future<Response> updateRequestLeave(
+      Map<String, dynamic> data, BuildContext context) async {
+    // Encode credentials for Basic Authentication
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    try {
+      return await _dio.put(
+        '/leave/request/update',
+        data: data,
+        options: Options(
+          headers: {
+            'Authorization': 'bearer $token',
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+    } on DioException catch (dioError) {
+      final messageEroor = dioError.response?.data;
+      // ignore: use_build_context_synchronously
+      CommonUtils.showTopSnackbar(
+          context, '${messageEroor["error"]}', Colors.red);
+
+      throw Exception('Error creating leave request: $dioError');
+    }
+  }
+
+  Future<Response> deleteRequestLeave(Map<String, dynamic> data) async {
+    // Encode credentials for Basic Authentication
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    try {
+      return await _dio.delete(
+        '/leave/request/delete',
+        data: data,
+        options: Options(
+          headers: {
+            'Authorization': 'bearer $token',
+            "Content-Type": "application/json",
+          },
+        ),
+      );
     } catch (e) {
-      throw Exception('Error creating leave request: $e');
+      throw Exception('Error delete leave request: $e');
+    }
+  }
+
+  Future<Response> approveLeave(Map<String, dynamic> data) async {
+    // Encode credentials for Basic Authentication
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    try {
+      return await _dio.post(
+        '/leave/request/approve',
+        data: data,
+        options: Options(
+          headers: {
+            'Authorization': 'bearer $token',
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+    } catch (e) {
+      throw Exception('Error approve leave request: $e');
+    }
+  }
+
+  Future<Response> rejectLeave(Map<String, dynamic> data) async {
+    // Encode credentials for Basic Authentication
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    try {
+      return await _dio.post(
+        '/leave/request/reject',
+        data: data,
+        options: Options(
+          headers: {
+            'Authorization': 'bearer $token',
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+    } catch (e) {
+      throw Exception('Error approve leave request: $e');
     }
   }
 
@@ -266,6 +372,24 @@ class ApiService {
     try {
       return await _dio.get(
         '/public/holidays/view',
+        options: Options(
+          headers: {
+            'Authorization': 'bearer $token',
+          },
+        ),
+      );
+    } catch (e) {
+      throw Exception('Failed to load public holiday: $e');
+    }
+  }
+
+  Future<Response> getSearchHolidays(Map<String, dynamic> data) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    try {
+      return await _dio.get(
+        '/public/holidays/search',
+        queryParameters: data,
         options: Options(
           headers: {
             'Authorization': 'bearer $token',

@@ -27,8 +27,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Profile'),
-        backgroundColor: Colors.red,
+        title: Text('Edit Profile', style: TextStyle(color: Colors.white)),
+        backgroundColor: Color(0xFF006D77),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {

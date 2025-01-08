@@ -44,8 +44,7 @@ class _SalaryHistoryPage extends ConsumerState<SalaryHistoryPage> {
             color: Colors.white,
           ),
         ),
-        // backgroundColor: Colors.blue,
-        backgroundColor: Colors.red,
+        backgroundColor: Color(0xFF006D77),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
