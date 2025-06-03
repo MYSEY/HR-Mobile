@@ -38,7 +38,7 @@ class _SalaryPage extends ConsumerState<PayrollListPage> {
             color: Colors.white,
           ),
         ),
-        backgroundColor: Color(0xFF006D77),
+        backgroundColor: Color(0xFF9F2E32),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
@@ -65,36 +65,52 @@ class _SalaryPage extends ConsumerState<PayrollListPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Summary Section
-            Card(
-              color: Colors.blue.shade50,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
+            SizedBox(
+              width: double.infinity, // Makes it take full width of the screen
+              child: Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  gradient: LinearGradient(
+                    colors: [
+                      Color.fromARGB(255, 159, 91, 3),
+                      Color(0xFFFFBB60)
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Payment Date: ${DateFormat('dd-MM-yyyy').format(payroll?.paymentDate ?? DateTime.now())}", // Use ?. and ?? 0
+                      "Payment Date: ${DateFormat('MMM-yyyy').format(payroll?.paymentDate ?? DateTime.now())}",
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      "Gross Salary: ${NumberFormat.currency(symbol: "\$").format(payroll?.totalGrossSalary ?? 0)}", // Use ?. and ?? 0
+                      "Basic Salary: ${NumberFormat.currency(symbol: "\$").format(payroll?.basicSalary ?? 0)}",
+                      // style:
+                      //     TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      "Gross Salary: ${NumberFormat.currency(symbol: "\$").format(payroll?.totalGrossSalary ?? 0)}",
+                      // style:
+                      //     TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    // SizedBox(height: 8),
+                    Text(
+                      'Deductions: ${NumberFormat.currency(symbol: "\$").format(deduction)}',
                       style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(height: 8),
+                    // SizedBox(height: 8),
                     Text(
-                      'Deductions: ${NumberFormat.currency(symbol: "\$").format(deduction)}', // Replace with actual deductions if available
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      'Net Salary: ${NumberFormat.currency(symbol: "\$").format(payroll?.totalSalary ?? 0)}', // Use ?. and ?? 0
+                      'Net Salary: ${NumberFormat.currency(symbol: "\$").format(payroll?.totalSalary ?? 0)}',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.green,
+                        // color: Colors.green,
                       ),
                     ),
                   ],

@@ -62,7 +62,7 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Change Password', style: TextStyle(color: Colors.white)),
-        backgroundColor: Color(0xFF006D77),
+        backgroundColor: Color(0xFF9F2E32),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {

@@ -96,7 +96,7 @@ class _motorPage extends ConsumerState<motorListPage> {
             color: Colors.white,
           ),
         ),
-        backgroundColor: Color(0xFF006D77),
+        backgroundColor: Color(0xFF9F2E32),
         // backgroundColor: Colors.blue,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),

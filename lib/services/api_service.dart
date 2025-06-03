@@ -41,6 +41,34 @@ class ApiService {
     }
   }
 
+  Future<Response> confirmLogin(
+      employeeId, String new_passwrod, String confirm_password) async {
+    try {
+      // Create the data object (same as the -d flag in curl)
+      var data = {
+        "employee_id": employeeId,
+        "new_password": new_passwrod,
+        "confirm_password": confirm_password,
+      };
+      // Make the POST request
+      final response = await _dio.post(
+        '/auth/confirm',
+        data: data,
+        options: Options(
+          headers: {
+            'accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      return response;
+    } on DioException catch (dioError) {
+      throw dioError;
+    } catch (e) {
+      throw Exception('Failed to load employees: $e');
+    }
+  }
+
   Future<Response> changePassword(
       String newPassword, String confirmPassword) async {
     // Encode credentials for Basic Authentication
@@ -83,10 +111,9 @@ class ApiService {
     }
   }
 
-  Future<Response> getEmployeeId() async {
+  Future<Response> getEmployeeId(String employeeId) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
-    final employeeId = prefs.getString('employeeid');
     try {
       return await _dio.get(
         '/employees/view-by-id/$employeeId',
@@ -119,12 +146,80 @@ class ApiService {
     }
   }
 
+  Future<Response> getChildrenInfoId(String employeeId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    try {
+      return await _dio.get(
+        '/children/infor/view-by-id/$employeeId',
+        options: Options(
+          headers: {
+            'Authorization': 'bearer $token',
+          },
+        ),
+      );
+    } catch (e) {
+      throw Exception('Failed to load employees: $e');
+    }
+  }
+
+  Future<Response> getEducationId(String employeeId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    try {
+      return await _dio.get(
+        '/education/view-by-id/$employeeId',
+        options: Options(
+          headers: {
+            'Authorization': 'bearer $token',
+          },
+        ),
+      );
+    } catch (e) {
+      throw Exception('Failed to load employees: $e');
+    }
+  }
+
+  Future<Response> getExperienceId(String employeeId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    try {
+      return await _dio.get(
+        '/experience/view-by-id/$employeeId',
+        options: Options(
+          headers: {
+            'Authorization': 'bearer $token',
+          },
+        ),
+      );
+    } catch (e) {
+      throw Exception('Failed to load employees: $e');
+    }
+  }
+
   Future<Response> getLeaveRequests() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
     try {
       return await _dio.get(
         '/leave/request/view',
+        options: Options(
+          headers: {
+            'Authorization': 'bearer $token',
+          },
+        ),
+      );
+    } catch (e) {
+      throw Exception('Failed to load leave request: $e');
+    }
+  }
+
+  Future<Response> getLeaveOnbehalfs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    try {
+      return await _dio.get(
+        '/leave/request/onbehalf',
         options: Options(
           headers: {
             'Authorization': 'bearer $token',
@@ -178,6 +273,31 @@ class ApiService {
     try {
       return await _dio.post(
         '/leave/request/create',
+        data: data,
+        options: Options(
+          headers: {
+            'Authorization': 'bearer $token',
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+    } on DioException catch (dioError) {
+      final messageEroor = dioError.response?.data;
+      CommonUtils.showTopSnackbar(
+          context, '${messageEroor["error"]}', Colors.red);
+
+      throw Exception('Error creating leave request: $dioError');
+    }
+  }
+
+  Future<Response> createOnbehalfRequest(
+      Map<String, dynamic> data, BuildContext context) async {
+    // Encode credentials for Basic Authentication
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    try {
+      return await _dio.post(
+        '/leave/request/onbehlf',
         data: data,
         options: Options(
           headers: {

@@ -112,6 +112,7 @@ class LeaveRequest {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'employee_id': employeeId,
       'leave_type_id': leaveTypeId,
       'handover_staff_id': handoverStaffId,
       'delegate_id': delegateId,

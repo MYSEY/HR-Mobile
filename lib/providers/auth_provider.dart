@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:app/screens/home_page.dart';
 import 'package:app/widgets/CommonUtils/common_util.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +27,22 @@ class AuthNotifier extends StateNotifier<bool> {
       final token = response.data['accessToken'];
       final role = response.data['role'];
       final employee = response.data['user'];
-      // print("role $role");
+
+      if (employee != null) {
+        if (employee['status'] == "Unactive") {
+          CommonUtils.showTopSnackbar(
+              context,
+              'Your account has been disable. Please contact to help desk',
+              Colors.red);
+          return false;
+        }
+        if (employee['status'] == "Active" && employee['p_status'] == 0) {
+          Navigator.pushReplacementNamed(context, '/confirm',
+              arguments: employee["id"]);
+          // Navigator.pushReplacementNamed(context, '/confirm');
+          return false;
+        }
+      }
       if (token != null && token.isNotEmpty) {
         // Save credentials and token in SharedPreferences
         final prefs = await SharedPreferences.getInstance();
@@ -36,14 +50,13 @@ class AuthNotifier extends StateNotifier<bool> {
         await prefs.setString('password', pass);
         await prefs.setString('token', token);
 
-        String roleJson =
-            jsonEncode(role); // Convert the role object to JSON string
+        String roleJson = jsonEncode(role);
         await prefs.setString('role', roleJson);
         String employeeJson = jsonEncode(employee);
         await prefs.setString('employee', employeeJson);
         // ignore: use_build_context_synchronously
-        CommonUtils.showTopSnackbar(
-            context, 'Login successfully', Colors.green);
+        // CommonUtils.showTopSnackbar(
+        //     context, 'Login successfully', Colors.green);
 
         // prefs.setString('role', role);
         state = true;
@@ -76,6 +89,68 @@ class AuthNotifier extends StateNotifier<bool> {
       // Handle any other errors
       final errorMessage = 'Failed to login: $e';
       // CommonUtils.showTopSnackbar(context, errorMessage, Colors.red);
+      return false;
+    }
+  }
+
+  Future<bool> confirmLogin(employeeId, String newPassword,
+      String confirmPassword, BuildContext context) async {
+    try {
+      final response = await apiService.confirmLogin(
+          employeeId, newPassword, confirmPassword);
+      final token = response.data['accessToken'];
+      final role = response.data['role'];
+
+      final employee = response.data['user'];
+      if (employee != null) {
+        if (employee['staus'] == "Unactive") {
+          CommonUtils.showTopSnackbar(
+              context,
+              'Your account has been disable. Please contact to help desk',
+              Colors.red);
+          return false;
+        }
+      }
+      // print("role $role");
+      if (token != null && token.isNotEmpty) {
+        // Save credentials and token in SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('employeeid', employee['number_employee']);
+        await prefs.setString('password', newPassword);
+        await prefs.setString('token', token);
+
+        String roleJson = jsonEncode(role);
+        await prefs.setString('role', roleJson);
+        String employeeJson = jsonEncode(employee);
+        await prefs.setString('employee', employeeJson);
+        state = true;
+        return true;
+      }
+
+      // Return false if token is null or empty
+      return false;
+    } on DioException catch (dioError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Wrong new password and confirm password.'),
+          duration: Duration(seconds: 3),
+          backgroundColor: Colors.red,
+        ),
+      );
+      // Handle Dio-specific errors
+      String errorMessage;
+
+      // Check if the response data is a map
+      if (dioError.response?.data is Map<String, dynamic>) {
+        errorMessage = dioError.response?.data['detail'] ?? 'An error occurred';
+      } else {
+        errorMessage = 'An error occurred';
+      }
+
+      return false;
+    } catch (e) {
+      // Handle any other errors
+      final errorMessage = 'Failed to login: $e';
       return false;
     }
   }

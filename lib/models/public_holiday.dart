@@ -34,24 +34,30 @@ class PublicHoliday {
   String get getDayAttribute {
     final DateFormat dayFormat = DateFormat('d'); // Day format
     final DateFormat monthFormat = DateFormat('MMM'); // Month format
+    final DateFormat yearFormat = DateFormat('yyyy'); // Year format
 
-    DateTime endDate = to ?? from;
+    DateTime endDate = to ?? from; // Ensure `to` is not null
     String endDay = dayFormat.format(endDate);
     String endMonth = monthFormat.format(endDate);
+    String endYear = yearFormat.format(endDate);
 
     int diffInDays = endDate.difference(from).inDays;
     String startDay = dayFormat.format(from);
+    String startYear = yearFormat.format(from);
 
-    String holidays = '';
+    List<String> holidays = [];
     int startInt = int.parse(startDay);
 
     if (diffInDays > 1) {
       for (int i = 0; i <= diffInDays; i++) {
-        holidays += startInt + i > 9 ? '${startInt + i},' : '0${startInt + i},';
+        int dayValue = startInt + i;
+        holidays.add(dayValue > 9 ? '$dayValue' : '0$dayValue');
       }
-      return '$endMonth $holidays';
+      return '${holidays.join(", ")} $endMonth, $endYear';
     } else {
-      return startInt > 9 ? '$endMonth $startInt' : '$endMonth 0$startInt';
+      return startInt > 9
+          ? '$startInt $endMonth , $startYear'
+          : '0$startInt $endMonth , $startYear';
     }
   }
 

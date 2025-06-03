@@ -30,7 +30,7 @@ class SettingsPage extends StatelessWidget {
           'Settings',
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: Color(0xFF006D77),
+        backgroundColor: Color(0xFF9F2E32),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
@@ -164,7 +164,7 @@ class SettingsPage extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromARGB(255, 233, 51, 51),
+                backgroundColor: Color(0xFF9F2E32),
               ),
               onPressed: () => _logout(context),
               child: Text(

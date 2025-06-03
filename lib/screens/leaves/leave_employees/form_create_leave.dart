@@ -1,32 +1,24 @@
 import 'dart:convert';
 
-import 'package:app/models/leave_request.dart';
-import 'package:app/providers/leave_request_provider.dart';
-import 'package:app/providers/public_holiday_provider.dart';
-import 'package:flutter/material.dart';
+import 'package:app/models/public_holiday.dart';
 import 'package:app/providers/auth_provider.dart';
+import 'package:app/providers/public_holiday_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app/providers/leave_request_provider.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:app/models/leave_request.dart';
 import 'dart:async';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-class EditRequestLeavePage extends ConsumerStatefulWidget {
-  final LeaveRequest leaveRequest;
-
-  const EditRequestLeavePage({Key? key, required this.leaveRequest})
-      : super(key: key);
-
+class FormRequestLeavePage extends ConsumerStatefulWidget {
   @override
-  _RequestLeavePageState createState() =>
-      _RequestLeavePageState(leaveRequest: leaveRequest);
+  _RequestLeavePageState createState() => _RequestLeavePageState();
 }
 
-class _RequestLeavePageState extends ConsumerState<EditRequestLeavePage> {
-  final LeaveRequest leaveRequest;
-  _RequestLeavePageState({Key? key, required this.leaveRequest});
-
+class _RequestLeavePageState extends ConsumerState<FormRequestLeavePage> {
+  // final _formKey = GlobalKey<FormState>();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? _leaveType;
   DateTime? _startDate;
@@ -37,10 +29,10 @@ class _RequestLeavePageState extends ConsumerState<EditRequestLeavePage> {
   String? _endDaySession;
   String? _reason;
   double _numberOfDays = 0;
-  double totalDays = 0;
   String? _handoverStaff;
   String? _delegate;
   bool? viewApprove = false;
+  String? role_type = "Employee";
 
   int countWeekdays(DateTime startDate, DateTime endDate) {
     int totalDays = 0;
@@ -62,32 +54,6 @@ class _RequestLeavePageState extends ConsumerState<EditRequestLeavePage> {
     super.initState();
     _getToken();
     ref.read(leaveProvider.notifier).fetchEmployeeLeaves();
-    if (leaveRequest != null) {
-      _leaveType = leaveRequest.leaveTypeId.toString();
-      _handoverStaff = leaveRequest.handoverStaffId.toString();
-      _delegate = leaveRequest.delegate?.delegate_id.toString();
-      _startDate = leaveRequest.startDate;
-      _endDate = leaveRequest.endDate;
-      final numberOfDay = leaveRequest.numberOfDay.toString();
-      _numberOfDays = double.parse(numberOfDay);
-      _reason = leaveRequest.reason;
-    }
-    _isHalfDay =
-        (leaveRequest.startHalfDay != null || leaveRequest.endHalfDay != null);
-    totalDays =
-        leaveRequest.endDate!.difference(leaveRequest.startDate!).inDays + 1;
-    if (_isHalfDay && totalDays == 1) {
-      _halfDaySession = leaveRequest.startHalfDay;
-    }
-    if (_isHalfDay && totalDays > 1) {
-      if (leaveRequest.startHalfDay != "" &&
-          leaveRequest.startHalfDay != null) {
-        _startDaySession = leaveRequest.startHalfDay;
-      }
-      if (leaveRequest.endHalfDay != "" && leaveRequest.endHalfDay != null) {
-        _endDaySession = leaveRequest.endHalfDay;
-      }
-    }
   }
 
   Future<void> _getToken() async {
@@ -96,6 +62,7 @@ class _RequestLeavePageState extends ConsumerState<EditRequestLeavePage> {
 
     if (roleString != null) {
       final role = jsonDecode(roleString); // Convert the JSON string to a Map
+      role_type = role["role_type"];
       final permission = role['Permission'];
       var result = permission.firstWhere(
         (perm) => perm["name"] == "lang.leaves_admin" && perm["is_view"] == 1,
@@ -110,28 +77,47 @@ class _RequestLeavePageState extends ConsumerState<EditRequestLeavePage> {
   }
 
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
+    DateTime initialDate = isStartDate
+        ? (_startDate ?? DateTime.now())
+        : (_endDate ?? _startDate ?? DateTime.now());
+
+    // Ensure initialDate is a weekday
+    while (initialDate.weekday == DateTime.saturday ||
+        initialDate.weekday == DateTime.sunday) {
+      initialDate = initialDate.add(Duration(days: 1));
+    }
+
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1900),
+      initialDate: initialDate,
+      firstDate: isStartDate ? DateTime(1900) : (_startDate ?? DateTime(1900)),
       lastDate: DateTime(2101),
       selectableDayPredicate: (DateTime day) {
-        // Disable Saturdays (6) and Sundays (7)
         return day.weekday != DateTime.saturday &&
             day.weekday != DateTime.sunday;
       },
     );
+
     if (picked != null) {
       setState(() {
         if (isStartDate) {
           _startDate = picked;
+          if (_endDate != null && _endDate!.isBefore(_startDate!)) {
+            _endDate = _startDate;
+          }
         } else {
-          _endDate = picked;
+          if (_startDate == null ||
+              picked.isAfter(_startDate!) ||
+              picked.isAtSameMomentAs(_startDate!)) {
+            _endDate = picked;
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('End date cannot be before start date')),
+            );
+          }
         }
         _isHalfDay = false;
         _halfDaySession = null;
-        _startDaySession = null;
-        _endDaySession = null;
         _calculateNumberOfDays();
       });
     }
@@ -181,16 +167,20 @@ class _RequestLeavePageState extends ConsumerState<EditRequestLeavePage> {
     final delegates = leaveState.delegates;
     final employee = leaveState.employee;
     final leaveTypes = leaveState.leaveTypes;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Edit Leave Request",
+          'Add new request leave',
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: Color(0xFF006D77),
+        // backgroundColor: Colors.blue,
+        backgroundColor: Color(0xFF9F2E32),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          color: Colors.white,
+          icon: Icon(
+            Icons.arrow_back,
+            color: Colors.white,
+          ),
           onPressed: () {
             Navigator.pushReplacementNamed(context, '/leaves/list',
                 arguments: viewApprove);
@@ -198,13 +188,13 @@ class _RequestLeavePageState extends ConsumerState<EditRequestLeavePage> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
               DropdownButtonFormField<String>(
-                value: leaveRequest?.leaveTypeId?.toString(),
+                value: _leaveType,
                 decoration: InputDecoration(labelText: 'Leave Type *'),
                 items: leaveTypes.map((type) {
                   return DropdownMenuItem<String>(
@@ -278,7 +268,7 @@ class _RequestLeavePageState extends ConsumerState<EditRequestLeavePage> {
                       ? 'Please select an AM and PM'
                       : null,
                 ),
-              if (_isHalfDay && totalDays > 1)
+              if (_isHalfDay && _numberOfDays > 1)
                 Column(
                   children: [
                     DropdownButtonFormField<String>(
@@ -324,7 +314,7 @@ class _RequestLeavePageState extends ConsumerState<EditRequestLeavePage> {
               ),
               SizedBox(height: 16.0),
               DropdownButtonFormField<String>(
-                value: leaveRequest.handoverStaffId?.toString(),
+                value: _handoverStaff,
                 decoration: InputDecoration(labelText: 'Handover Staff'),
                 items: employee.map((emp) {
                   return DropdownMenuItem<String>(
@@ -338,26 +328,27 @@ class _RequestLeavePageState extends ConsumerState<EditRequestLeavePage> {
                   });
                 },
               ),
-              SizedBox(height: 16.0),
-              DropdownButtonFormField<String>(
-                value: _delegate,
-                decoration: InputDecoration(labelText: 'Delegate'),
-                items: delegates.map((emp) {
-                  return DropdownMenuItem<String>(
-                    value: emp.iD?.toString(),
-                    child: Text(emp.employeeNameEn),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _delegate = value;
-                  });
-                },
-              ),
+              if (role_type != "Employee") ...[
+                const SizedBox(height: 16.0),
+                DropdownButtonFormField<String>(
+                  value: _delegate,
+                  decoration: const InputDecoration(labelText: 'Delegate'),
+                  items: delegates.map((emp) {
+                    return DropdownMenuItem<String>(
+                      value: emp.iD?.toString(),
+                      child: Text(emp.employeeNameEn),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _delegate = value;
+                    });
+                  },
+                ),
+              ],
               SizedBox(height: 16.0),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Leave Reason *'),
-                controller: TextEditingController(text: _reason.toString()),
                 maxLines: 3,
                 validator: (value) =>
                     value!.isEmpty ? 'Please provide a reason for leave' : null,
@@ -377,7 +368,6 @@ class _RequestLeavePageState extends ConsumerState<EditRequestLeavePage> {
                   if (_formKey.currentState!.validate()) {
                     // Create the LeaveRequest object with form values
                     LeaveRequest request = LeaveRequest(
-                      id: leaveRequest.id,
                       leaveTypeId: int.tryParse(_leaveType ?? ""),
                       startDate: _startDate ?? DateTime.now(),
                       endDate: _endDate ?? DateTime.now(),
@@ -390,14 +380,14 @@ class _RequestLeavePageState extends ConsumerState<EditRequestLeavePage> {
                     );
                     await ref
                         .read(leaveProvider.notifier)
-                        .updateRequestLeave(request, context);
+                        .createRequestLeave(request, context);
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
+                  backgroundColor: Color(0xFF9F2E32),
                 ),
                 child: Text(
-                  'Edit Request',
+                  'Apply',
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.white,

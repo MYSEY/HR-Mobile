@@ -1,34 +1,75 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app/providers/auth_provider.dart';
+import 'package:app/widgets/CommonUtils/common_util.dart';
 
-// final authProvider = Provider((ref) => AuthProvider());
-
-class LoginPage extends ConsumerStatefulWidget {
+class ConfirmPasswordPage extends ConsumerStatefulWidget {
+  final int employeeId;
+  ConfirmPasswordPage({Key? key, required this.employeeId}) : super(key: key);
   @override
-  _LoginPageState createState() => _LoginPageState();
+  _ConfirmPasswordPageState createState() => _ConfirmPasswordPageState();
 }
 
-class _LoginPageState extends ConsumerState<LoginPage> {
-  final _usernameController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _formKey =
-      GlobalKey<FormState>(); // Add a GlobalKey for form validation
-
-  String? _usernameError;
-  String? _passwordError;
+class _ConfirmPasswordPageState extends ConsumerState<ConfirmPasswordPage> {
+  final _newPasswordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  late int employeeId;
+  String? _newPasswordError;
+  String? _confirmPasswordError;
   bool _obscureText = true;
+  bool _obscureTextNew = true;
 
-  void _togglePasswordVisibility() {
+  void initState() {
+    super.initState();
+    employeeId = widget.employeeId;
+  }
+
+  void _togglePasswordNew() {
+    setState(() {
+      _obscureTextNew = !_obscureTextNew;
+    });
+  }
+
+  void _togglePasswordConfirm() {
     setState(() {
       _obscureText = !_obscureText;
     });
   }
 
-  Future<void> _login() async {
-    final success = await ref
-        .read(authNotifierProvider.notifier)
-        .login(_usernameController.text, _passwordController.text, context);
+  Future<void> _confirmLogin() async {
+    final newPassword = _newPasswordController.text.trim();
+    final confirmPassword = _confirmPasswordController.text.trim();
+
+    if (newPassword.isEmpty || confirmPassword.isEmpty) {
+      CommonUtils.showTopSnackbar(
+          context, 'Please fill in all fields.', Colors.red);
+      return;
+    }
+
+    if (newPassword != confirmPassword) {
+      CommonUtils.showTopSnackbar(
+          context, 'You have entered incorrect password!.', Colors.red);
+      return;
+    }
+    // Password strength check
+    final passwordRegex =
+        RegExp(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$');
+    if (!passwordRegex.hasMatch(newPassword)) {
+      CommonUtils.showTopSnackbar(
+        context,
+        'Password must be at least 8 characters and include a letter, number, and symbol.',
+        Colors.red,
+      );
+      return;
+    }
+    final success = await ref.read(authNotifierProvider.notifier).confirmLogin(
+          employeeId,
+          newPassword,
+          confirmPassword,
+          context,
+        );
+
     if (success == true) {
       Navigator.pushReplacementNamed(context, '/home');
     }
@@ -37,21 +78,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: Colors.blue,
-      // backgroundColor: Colors.red,
-      // backgroundColor: Color(0xFF006D77),
       body: Center(
         child: Form(
           key: _formKey,
-          // padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              // Stack for the icon and background circles
               Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Outer colorful dots
                   Positioned(
                     top: -10,
                     left: 20,
@@ -99,7 +134,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               SizedBox(height: 20),
               // Welcome Back Text
               Text(
-                'Welcome',
+                'Change Password',
                 style: TextStyle(
                   fontSize: 28,
                   // color: Colors.white,
@@ -108,9 +143,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               ),
               SizedBox(height: 10),
               Text(
-                'Hello there, sign in to continue',
+                'Please to set new password and confirm password!',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 15,
                   // color: Colors.white70,
                 ),
               ),
@@ -126,24 +161,33 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     children: <Widget>[
                       // Phone Number Field
                       TextFormField(
-                        controller: _usernameController,
+                        controller: _newPasswordController,
                         decoration: InputDecoration(
-                          labelText: 'Employee ID',
+                          labelText: 'New password',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8.0),
                           ),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscureTextNew
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                            onPressed: _togglePasswordNew,
+                          ),
                           errorText:
-                              _usernameError, // Display error message if present
+                              _newPasswordError, // Display error message if present
                         ),
+                        obscureText: _obscureTextNew,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             setState(() {
-                              _usernameError = 'Employee id is required';
+                              _newPasswordError = 'New password is required';
                             });
-                            return _usernameError;
+                            return _newPasswordError;
                           }
                           setState(() {
-                            _usernameError =
+                            _newPasswordError =
                                 null; // Reset error message if valid
                           });
                           return null;
@@ -152,9 +196,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       SizedBox(height: 20),
                       // Password Field
                       TextFormField(
-                        controller: _passwordController,
+                        controller: _confirmPasswordController,
                         decoration: InputDecoration(
-                          labelText: 'Password',
+                          labelText: 'Confirm password',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8.0),
                           ),
@@ -164,34 +208,27 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                   ? Icons.visibility_off
                                   : Icons.visibility,
                             ),
-                            onPressed: _togglePasswordVisibility,
+                            onPressed: _togglePasswordConfirm,
                           ),
                           errorText:
-                              _passwordError, // Display error message if present
+                              _confirmPasswordError, // Display error message if present
                         ),
                         obscureText: _obscureText,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             setState(() {
-                              _passwordError = 'Password is required';
+                              _confirmPasswordError =
+                                  'Confirm password is required';
                             });
-                            return _passwordError;
+                            return _confirmPasswordError;
                           }
                           setState(() {
-                            _passwordError =
+                            _confirmPasswordError =
                                 null; // Reset error message if valid
                           });
                           return null;
                         },
                       ),
-                      // SizedBox(height: 10),
-                      // Align(
-                      //   alignment: Alignment.centerRight,
-                      //   child: TextButton(
-                      //     onPressed: () {},
-                      //     child: Text('Forgot your password?'),
-                      //   ),
-                      // ),
                     ],
                   ),
                 ),
@@ -208,7 +245,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ),
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    _login();
+                    _confirmLogin();
                   }
                 },
                 child: Text(

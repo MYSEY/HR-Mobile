@@ -44,7 +44,7 @@ class _SalaryHistoryPage extends ConsumerState<SalaryHistoryPage> {
             color: Colors.white,
           ),
         ),
-        backgroundColor: Color(0xFF006D77),
+        backgroundColor: Color(0xFF9F2E32),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
@@ -120,52 +120,247 @@ class _SalaryHistoryPage extends ConsumerState<SalaryHistoryPage> {
                           itemBuilder: (context, index) {
                             final record = filteredPayrollHistory[index];
                             final totalSalaryTaxUsd =
-                                record?.totalSalaryTaxUsd ?? 0;
+                                record.totalSalaryTaxUsd ?? 0;
                             final totalPensionFund =
-                                record?.totalPensionFund ?? 0;
-                            final loanAmount = record?.loanAmount ?? 0;
-                            final totalStaffBook = record?.totalStaffBook ?? 0;
-                            final deduction = totalSalaryTaxUsd +
+                                record.totalPensionFund ?? 0;
+                            final loanAmount = record.loanAmount ?? 0;
+                            final totalStaffBook = record.totalStaffBook ?? 0;
+                            final totalEarnings = record.totalGrossSalary ?? 0;
+                            final totalDeductions = totalSalaryTaxUsd +
                                 totalPensionFund +
                                 loanAmount +
                                 totalStaffBook;
+                            // final netPay = totalEarnings - totalDeductions;
+
+                            final List<Map<String, dynamic>> earnings = [
+                              {
+                                "label": "Basic Salary Received",
+                                "amount": record.basicSalary
+                              },
+                              {
+                                "label": "Increasement",
+                                "amount": record.user!.salaryIncreas
+                              },
+                              {
+                                "label": "Monthly/Quarterly Incentive",
+                                "amount": record.monthlyQuarterlybonuses
+                              },
+                              {
+                                "label":
+                                    "Allowance(Khmer New Year / Pechum Ben)",
+                                "amount": record.totalKnyPhcumben
+                              },
+                              {
+                                "label": "Seniority Pay (Included Tax)",
+                                "amount": record.seniorityPayIncludedTax
+                              },
+                              {
+                                "label": "Seniority Pay (Excluded Tax)",
+                                "amount": record.seniorityPayExcludedTax
+                              },
+                              {
+                                "label": "Severance Pay",
+                                "amount": record.totalSeverancePay
+                              },
+                              {
+                                "label": "Adjustment Included Tax(+/-)",
+                                "amount": record.adjustmentIncludeTaxe
+                              },
+                              {
+                                "label": "Adjustment Excluded Tax(+/-)",
+                                "amount": record.adjustment
+                              },
+                              {
+                                "label": "Phone Allowance",
+                                "amount": record.phoneAllowance
+                              },
+                              {
+                                "label": "Child Allowance",
+                                "amount": record.totalChildAllowance
+                              },
+                              {
+                                "label": "Parking Allowance",
+                                "amount": record.totalAmountCar
+                              },
+                              {
+                                "label": "Other Benefits",
+                                "amount": record.otherBenefits
+                              },
+                            ];
+                            final List<Map<String, dynamic>> deductions = [
+                              {
+                                "label": "Personal Tax",
+                                "amount": record.totalSalaryTaxUsd
+                              },
+                              {
+                                "label": "Pension Fund",
+                                "amount": record.totalPensionFund
+                              },
+                              {
+                                "label": "Staff Loan",
+                                "amount": record.loanAmount
+                              },
+                              {
+                                "label": "Other Deduction",
+                                "amount": record.totalStaffBook
+                              },
+                            ];
+
                             return Card(
-                              margin: EdgeInsets.all(8),
+                              margin: EdgeInsets.all(16),
                               child: ExpansionTile(
                                 title: Text(
-                                  'Salary for ${DateFormat('MM-yyyy').format(record.paymentDate ?? DateTime.now())}',
+                                  'Salary for ${DateFormat('MMM-yyyy').format(record.paymentDate ?? DateTime.now())}',
                                 ),
                                 subtitle: Text('Net: \$${record.totalSalary}'),
                                 children: [
-                                  ListTile(
-                                    title: Text('Gross Salary'),
-                                    trailing:
-                                        Text('\$${record.totalGrossSalary}'),
+                                  Table(
+                                    children: [
+                                      _buildTableHeader(deductions),
+                                    ],
                                   ),
-                                  ListTile(
-                                    title: Text('Deductions'),
-                                    trailing: Text('\$${deduction}'),
+                                  const Divider(height: 0),
+                                  SizedBox(
+                                    height: 300,
+                                    child: SingleChildScrollView(
+                                      child: Table(
+                                        columnWidths: const {
+                                          0: FlexColumnWidth(3),
+                                          1: FlexColumnWidth(2),
+                                          2: FlexColumnWidth(3),
+                                          3: FlexColumnWidth(2),
+                                        },
+                                        border: TableBorder.symmetric(
+                                          inside: BorderSide(
+                                              color: Colors.grey.shade300),
+                                        ),
+                                        children: _buildTableRows(
+                                            earnings, deductions),
+                                      ),
+                                    ),
                                   ),
-                                  ListTile(
-                                    title: Text('Net Salary'),
-                                    trailing: Text('\$${record.totalSalary}'),
+                                  const SizedBox(height: 12),
+                                  _buildSummaryRow(
+                                    "Total Earnings",
+                                    totalEarnings,
+                                    "Total Deductions",
+                                    totalDeductions,
+                                    bold: true,
                                   ),
-                                  ListTile(
-                                    title: Text('Bonuses'),
-                                    trailing: Text('\$0.00'),
-                                  ),
-                                  ListTile(
-                                    title: Text('Exchange Rate'),
-                                    trailing: Text('${record.exchangeRate}'),
+                                  const SizedBox(height: 8),
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Text(
+                                      "Total Net Pay: \$${record.totalSalary}",
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14),
+                                    ),
                                   ),
                                 ],
                               ),
                             );
                           },
                         ),
-                ),
+                )
               ],
             ),
+    );
+  }
+
+  TableRow _buildTableHeader(deductions) {
+    return const TableRow(
+      decoration: BoxDecoration(color: Colors.orange),
+      children: [
+        Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Text("Earning",
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        ),
+        Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Text("Amount",
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        ),
+        Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Text("Deduction",
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        ),
+        Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Text("Amount",
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        ),
+      ],
+    );
+  }
+
+  String formatAmount(dynamic value) {
+    final number = value is num ? value : double.tryParse(value.toString());
+    return number != null ? '\$${number.toStringAsFixed(2)}' : '-';
+  }
+
+  List<TableRow> _buildTableRows(List<Map<String, dynamic>> earnings,
+      List<Map<String, dynamic>> deductions) {
+    final maxRows =
+        [earnings.length, deductions.length].reduce((a, b) => a > b ? a : b);
+
+    return List.generate(maxRows, (i) {
+      final earn = i < earnings.length ? earnings[i] : null;
+      final deduct = i < deductions.length ? deductions[i] : null;
+
+      return TableRow(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(6.0),
+            child: Text(earn?["label"] ?? "", style: TextStyle(fontSize: 12)),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(6.0),
+            child: Text(earn != null ? formatAmount(earn["amount"]) : ""),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(6.0),
+            child: Text(deduct?["label"] ?? "", style: TextStyle(fontSize: 12)),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(6.0),
+            child: Text(deduct != null ? formatAmount(deduct["amount"]) : ""),
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget _buildSummaryRow(
+      String title1, double value1, String title2, double value2,
+      {bool bold = false}) {
+    final style = TextStyle(
+        fontSize: 12, fontWeight: bold ? FontWeight.bold : FontWeight.normal);
+    return Row(
+      children: [
+        Expanded(
+          flex: 3,
+          child: Text(title1, style: style),
+        ),
+        Expanded(
+          flex: 2,
+          child: Text("\$${value1.toStringAsFixed(2)}", style: style),
+        ),
+        Expanded(
+          flex: 3,
+          child: Text(title2, style: style),
+        ),
+        Expanded(
+          flex: 2,
+          child: Text("\$${value2.toStringAsFixed(2)}", style: style),
+        ),
+      ],
     );
   }
 }

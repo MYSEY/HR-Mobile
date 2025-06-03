@@ -25,7 +25,7 @@ class _PublicHolidaysPageState extends ConsumerState<PublicHolidaysPage> {
         title: const Text("Public Holidays",
             style: TextStyle(color: Colors.white)),
         centerTitle: true,
-        backgroundColor: Color(0xFF006D77),
+        backgroundColor: Color(0xFF9F2E32),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
@@ -36,7 +36,8 @@ class _PublicHolidaysPageState extends ConsumerState<PublicHolidaysPage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: publicHolidays.isEmpty
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(child: Text('No data to display.'))
+            // const Center(child: CircularProgressIndicator())
             : ListView.builder(
                 itemCount: publicHolidays.length,
                 itemBuilder: (context, index) {

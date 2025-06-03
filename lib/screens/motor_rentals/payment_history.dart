@@ -44,7 +44,7 @@ class _MTHistoryPage extends ConsumerState<MTHistoryPage> {
           ),
         ),
         // backgroundColor: Colors.blue,
-        backgroundColor: Color(0xFF006D77),
+        backgroundColor: Color(0xFF9F2E32),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
