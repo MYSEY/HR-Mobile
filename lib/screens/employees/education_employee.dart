@@ -20,7 +20,6 @@ class _EducationPageState extends ConsumerState<EducationPage> {
   @override
   void initState() {
     super.initState();
-    employeeId = widget.employeeId;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       fetEducations();
     });
@@ -28,7 +27,14 @@ class _EducationPageState extends ConsumerState<EducationPage> {
 
   void fetEducations() async {
     try {
-      await ref.read(educationProvider.notifier).fetchEducationId(employeeId);
+      final args =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final employee_id = args?['id'] as int?;
+
+      if (employee_id == null) {
+        throw Exception("Employee ID is required to fetch children.");
+      }
+      await ref.read(educationProvider.notifier).fetchEducationId(employee_id);
       debugPrint("Education information fetched successfully.");
     } catch (error) {
       debugPrint("Error fetching Education information: $error");
@@ -38,6 +44,10 @@ class _EducationPageState extends ConsumerState<EducationPage> {
   @override
   Widget build(BuildContext context) {
     final dataEducations = ref.watch(educationProvider);
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final source = args?['source'] as String? ?? '';
+    final employeeId = args?['id'] as int?;
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -48,8 +58,19 @@ class _EducationPageState extends ConsumerState<EducationPage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
-            Navigator.pushNamed(context, '/employees/detail',
-                arguments: employeeId);
+            if (source == 'myprofile') {
+              Navigator.pushNamedAndRemoveUntil(
+                  context, '/myprofile', (route) => false);
+            } else if (source == 'employees/detail') {
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/employees/detail',
+                arguments: employeeId,
+                (route) => false,
+              );
+            } else {
+              Navigator.pop(context);
+            }
           },
         ),
       ),
@@ -71,7 +92,7 @@ class _EducationPageState extends ConsumerState<EducationPage> {
                         final experience = dataEducations[index];
                         return ListTile(
                           title: Text(
-                            "* Date: ${DateFormat('dd-MMM-yyyy').format(experience.start_date!)} - ${DateFormat('dd-MMM-yyyy').format(experience.end_date!)}",
+                            "Date: ${DateFormat('dd-MMM-yyyy').format(experience.start_date!)} - ${DateFormat('dd-MMM-yyyy').format(experience.end_date!)}",
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Column(

@@ -65,6 +65,13 @@ class SettingsPage extends StatelessWidget {
               Navigator.pushReplacementNamed(context, '/change/password');
             },
           ),
+          // ListTile(
+          //   leading: Icon(Icons.person),
+          //   title: Text("Personal Information "),
+          //   onTap: () {
+          //     Navigator.pushReplacementNamed(context, '/myprofile');
+          //   },
+          // ),
           Divider(),
 
           // Notifications Section

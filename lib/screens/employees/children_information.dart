@@ -1,4 +1,5 @@
 import 'dart:ffi';
+import 'dart:math';
 import 'package:app/screens/employees/employee_list.dart';
 import 'package:flutter/material.dart';
 import 'package:app/providers/children_info_provider.dart';
@@ -19,7 +20,6 @@ class _ChildrenInforPageState extends ConsumerState<ChildrenInforPage> {
   @override
   void initState() {
     super.initState();
-    employeeId = widget.employeeId;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       fetchChildrens();
     });
@@ -27,9 +27,16 @@ class _ChildrenInforPageState extends ConsumerState<ChildrenInforPage> {
 
   void fetchChildrens() async {
     try {
+      final args =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final employee_id = args?['id'] as int?;
+
+      if (employee_id == null) {
+        throw Exception("Employee ID is required to fetch children.");
+      }
       await ref
           .read(childreenInforProvider.notifier)
-          .fetchChildrenId(employeeId);
+          .fetchChildrenId(employee_id);
       debugPrint("Children information fetched successfully.");
     } catch (error) {
       debugPrint("Error fetching Children information: $error");
@@ -58,6 +65,10 @@ class _ChildrenInforPageState extends ConsumerState<ChildrenInforPage> {
   @override
   Widget build(BuildContext context) {
     final dataChildren = ref.watch(childreenInforProvider);
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final source = args?['source'] as String? ?? '';
+    final employeeId = args?['id'] as int?;
     return Scaffold(
         appBar: AppBar(
           title: Text(
@@ -68,8 +79,19 @@ class _ChildrenInforPageState extends ConsumerState<ChildrenInforPage> {
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () {
-              Navigator.pushNamed(context, '/employees/detail',
-                  arguments: employeeId);
+              if (source == 'myprofile') {
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/myprofile', (route) => false);
+              } else if (source == 'employees/detail') {
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/employees/detail',
+                  arguments: employeeId,
+                  (route) => false,
+                );
+              } else {
+                Navigator.pop(context);
+              }
             },
           ),
         ),

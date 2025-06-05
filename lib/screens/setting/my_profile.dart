@@ -6,22 +6,38 @@ import 'package:app/providers/employee_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
-class EmployeeDetailPage extends ConsumerStatefulWidget {
-  final int employeeId;
-
-  EmployeeDetailPage({Key? key, required this.employeeId}) : super(key: key);
-
+class MyProfilePage extends ConsumerStatefulWidget {
   @override
-  _EmployeeDetailPageState createState() => _EmployeeDetailPageState();
+  _MyProfilePageState createState() => _MyProfilePageState();
 }
 
-class _EmployeeDetailPageState extends ConsumerState<EmployeeDetailPage> {
+class _MyProfilePageState extends ConsumerState<MyProfilePage> {
   late int employeeId;
   @override
   void initState() {
     super.initState();
-    employeeId = widget.employeeId;
+    _getToken();
+  }
+
+  Future<void> _getToken() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      // Get the JSON string from SharedPreferences
+      final employeeJsonString = prefs.getString('employee');
+      if (employeeJsonString != null) {
+        // Decode the JSON string to a map
+        final Map<String, dynamic> employee = jsonDecode(employeeJsonString);
+
+        setState(() {
+          employeeId = employee['id'];
+        });
+      }
+    } catch (e) {
+      print("Error loading data: $e");
+    }
   }
 
   void _launchPhone(String? phoneNumber) async {
@@ -71,18 +87,14 @@ class _EmployeeDetailPageState extends ConsumerState<EmployeeDetailPage> {
           return Scaffold(
             appBar: AppBar(
               title: Text(
-                "Employee Details",
+                "My Profile",
                 style: TextStyle(color: Colors.white),
               ),
               backgroundColor: const Color(0xFF9F2E32),
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back, color: Colors.white),
                 onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => EmployeePage()),
-                    (route) => false,
-                  );
+                  Navigator.pushReplacementNamed(context, '/home');
                 },
               ),
             ),
@@ -98,7 +110,7 @@ class _EmployeeDetailPageState extends ConsumerState<EmployeeDetailPage> {
                   _buildExpandableSection("Experience Informations", null,
                       "/experience", snapshot.data!.id),
                   _buildExpandableSection("Children Informations", null,
-                      "/children/infor", snapshot.data!.id),
+                      "/children/infor", employeeId),
                   _buildExpandableSection("Employment & Education", null,
                       "/education", snapshot.data!.id),
                 ],
@@ -251,8 +263,11 @@ class _EmployeeDetailPageState extends ConsumerState<EmployeeDetailPage> {
           title: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
           trailing: Icon(Icons.arrow_forward_ios, size: 16),
           onTap: () {
-            Navigator.pushNamed(context, '${url}',
-                arguments: {'source': 'employees/detail', 'id': employeeId});
+            Navigator.pushNamed(
+              context,
+              '${url}',
+              arguments: {'source': 'myprofile', 'id': employeeId},
+            );
           },
         ),
       );

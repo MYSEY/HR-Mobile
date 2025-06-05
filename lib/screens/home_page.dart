@@ -251,7 +251,7 @@ class _HomePageState extends State<HomePage> {
               Navigator.pushReplacementNamed(context, "/home");
               break;
             case 1:
-              Navigator.pushReplacementNamed(context, "/messages");
+              Navigator.pushReplacementNamed(context, "/myprofile");
               break;
             case 2:
               Navigator.pushReplacementNamed(context, "/setting");
@@ -260,7 +260,8 @@ class _HomePageState extends State<HomePage> {
         },
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.mail), label: "Messages"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.person), label: "My Profile"),
           BottomNavigationBarItem(
               icon: Icon(Icons.settings), label: "Settings"),
         ],

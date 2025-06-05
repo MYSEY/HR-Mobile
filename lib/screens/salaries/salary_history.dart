@@ -221,7 +221,7 @@ class _SalaryHistoryPage extends ConsumerState<SalaryHistoryPage> {
                                   ),
                                   const Divider(height: 0),
                                   SizedBox(
-                                    height: 300,
+                                    height: 550,
                                     child: SingleChildScrollView(
                                       child: Table(
                                         columnWidths: const {

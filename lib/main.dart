@@ -10,6 +10,7 @@ import 'package:app/screens/home_page.dart';
 import 'package:app/screens/setting/setting.dart';
 import 'package:app/screens/setting/change_password.dart';
 import 'package:app/screens/setting/edit_profile.dart';
+import 'package:app/screens/setting/my_profile.dart';
 // block employees ***
 import 'package:app/screens/employees/employee_list.dart';
 import 'package:app/screens/employees/employee_detail.dart';
@@ -93,6 +94,7 @@ class MyApp extends StatelessWidget {
           return EditOnbehalfLeavePage(leaveRequest: args);
         },
         '/employees': (context) => EmployeePage(),
+        '/myprofile': (context) => MyProfilePage(),
         // '/employees/detail': (context) => EmployeeDetailPage(),
 
         '/employees/detail': (context) {
@@ -101,18 +103,25 @@ class MyApp extends StatelessWidget {
           return EmployeeDetailPage(employeeId: employeeId);
         },
         '/children/infor': (context) {
-          final employeeId =
-              ModalRoute.of(context)?.settings.arguments as int? ?? 0;
+          final args = ModalRoute.of(context)?.settings.arguments
+                  as Map<String, dynamic>? ??
+              {};
+          final employeeId = args['id'] as int? ?? 0;
+
           return ChildrenInforPage(employeeId: employeeId);
         },
         '/education': (context) {
-          final employeeId =
-              ModalRoute.of(context)?.settings.arguments as int? ?? 0;
+          final args = ModalRoute.of(context)?.settings.arguments
+                  as Map<String, dynamic>? ??
+              {};
+          final employeeId = args['id'] as int? ?? 0;
           return EducationPage(employeeId: employeeId);
         },
         '/experience': (context) {
-          final employeeId =
-              ModalRoute.of(context)?.settings.arguments as int? ?? 0;
+          final args = ModalRoute.of(context)?.settings.arguments
+                  as Map<String, dynamic>? ??
+              {};
+          final employeeId = args['id'] as int? ?? 0;
           return ExperiencePage(employeeId: employeeId);
         },
         '/trainings': (context) => TrainingListPage(),
