@@ -1,6 +1,7 @@
 import 'package:app/providers/employee_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EmployeePage extends ConsumerStatefulWidget {
   const EmployeePage({Key? key}) : super(key: key);
@@ -40,6 +41,7 @@ class _EmployeePageState extends ConsumerState<EmployeePage> {
 
   @override
   Widget build(BuildContext context) {
+    String currentLanguage = Localizations.localeOf(context).languageCode;
     final dataEmployees = ref.watch(employeeProvider);
     // Filter employees based on the search query
     final filteredEmployees = dataEmployees.where((employee) {
@@ -49,8 +51,8 @@ class _EmployeePageState extends ConsumerState<EmployeePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Employees',
+        title: Text(
+          AppLocalizations.of(context)!.employees,
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color(0xFF9F2E32),
@@ -70,9 +72,9 @@ class _EmployeePageState extends ConsumerState<EmployeePage> {
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: TextField(
                 controller: _searchController,
-                decoration: const InputDecoration(
-                  labelText: 'Search',
-                  prefixIcon: Icon(Icons.search),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.search,
+                  prefixIcon: const Icon(Icons.search),
                 ),
               ),
             ),
@@ -90,7 +92,9 @@ class _EmployeePageState extends ConsumerState<EmployeePage> {
                   String statusEmployee =
                       statusMap[employee.empStatus] ?? "Unknown";
                   return ListTile(
-                    key: ValueKey(employee.employeeNameEn),
+                    key: ValueKey(currentLanguage == "en"
+                        ? employee.employeeNameEn
+                        : employee.employeeNameKh),
                     leading: CircleAvatar(
                       backgroundImage: (employee.profile != null &&
                               employee.profile!.isNotEmpty)
@@ -103,13 +107,17 @@ class _EmployeePageState extends ConsumerState<EmployeePage> {
                       // AssetImage('${employee.profile ?? ""}'),
                       radius: 30,
                     ),
-                    title: Text('${employee.employeeNameEn}',
+                    title: Text(
+                        '${currentLanguage == "en" ? employee.employeeNameEn : employee.employeeNameKh}',
                         style: const TextStyle(fontWeight: FontWeight.bold)),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(employee.position!.name_english),
-                        Text("${employee.branch!.branch_name_en}",
+                        Text(currentLanguage == "en"
+                            ? employee.position!.name_english
+                            : employee.position!.name_khmer),
+                        Text(
+                            "${currentLanguage == "en" ? employee.branch!.branch_name_en : employee.branch!.branch_name_kh}",
                             style: const TextStyle(
                                 fontSize: 12, color: Colors.grey)),
                       ],

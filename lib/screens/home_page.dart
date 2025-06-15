@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void main() => runApp(MyApp());
 
@@ -27,12 +28,46 @@ class _HomePageState extends State<HomePage> {
   String? location;
   int _selectedIndex = 0;
   String? employeeJson;
+  String? _currentLanguage;
   var menus = [];
 
   @override
   void initState() {
     super.initState();
+    _checkToken();
     _getToken(); // Retrieve the token when the home page initializes
+  }
+
+  Future<bool> isTokenExpired() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token == null) return true;
+
+    try {
+      final parts = token.split('.');
+      if (parts.length != 3) return true;
+
+      final payload = json.decode(
+        utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))),
+      );
+
+      final exp = payload['exp'];
+      if (exp == null) return true;
+
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      return now >= exp;
+    } catch (_) {
+      return true;
+    }
+  }
+
+  void _checkToken() async {
+    if (await isTokenExpired()) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('token');
+
+      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+    }
   }
 
   Future<void> _getToken() async {
@@ -57,28 +92,28 @@ class _HomePageState extends State<HomePage> {
                 perm['is_view'] == 1) {
               menus.add({
                 'icon': Icons.people,
-                'label': 'All\nEmployee',
+                'label': AppLocalizations.of(context)!.allEmployee,
                 'route': '/employees',
               });
             }
             if (perm['url'] == "payroll" && perm['is_view'] == 1) {
               menus.add({
                 'icon': Icons.attach_money,
-                'label': 'C&B',
+                'label': AppLocalizations.of(context)!.cb,
                 'route': '/salaries',
               });
             }
             if (perm['url'] == "holidays" && perm['is_view'] == 1) {
               menus.add({
                 'icon': Icons.event,
-                'label': 'Public\nHolidays',
+                'label': AppLocalizations.of(context)!.publicHolidays,
                 'route': '/public/holiday',
               });
             }
             if (perm['url'] == "leaves/admin" && perm['is_view'] == 1) {
               menus.add({
                 'icon': Icons.check_circle_outline,
-                'label': 'Leave\nAdmin',
+                'label': AppLocalizations.of(context)!.leaveAdmin,
                 'route': '/leaves/admin',
                 'arguments': viewApprove,
               });
@@ -86,7 +121,7 @@ class _HomePageState extends State<HomePage> {
             if (perm['url'] == "leaves/employee" && perm['is_view'] == 1) {
               menus.add({
                 'icon': Icons.add_circle,
-                'label': 'Leave\nEmployee',
+                'label': AppLocalizations.of(context)!.leaveEmployee,
                 'route': '/leaves/list',
                 'arguments': viewApprove,
               });
@@ -94,7 +129,7 @@ class _HomePageState extends State<HomePage> {
             if (perm['url'] == "leaves/replcement" && perm['is_view'] == 1) {
               menus.add({
                 'icon': Icons.add_circle,
-                'label': 'Leave\nOn Behalf',
+                'label': AppLocalizations.of(context)!.leaveOnBehelf,
                 'route': '/leaves/onbehalf',
                 'arguments': viewApprove,
               });
@@ -109,14 +144,14 @@ class _HomePageState extends State<HomePage> {
             if (perm['url'] == "training/list" && perm['is_view'] == 1) {
               menus.add({
                 'icon': Icons.book,
-                'label': 'Training',
+                'label': AppLocalizations.of(context)!.training,
                 'route': '/trainings',
               });
             }
             // if (perm['url'] == "admin-expense/list" && perm['is_view'] == 1) {
             //   menus.add({
             //     'icon': Icons.attach_money,
-            //     'label': 'Expense\nAdmin',
+            //     'label': AppLocalizations.of(context)!.expenseAdmin,
             //     'route': '/expense/admin',
             //   });
             // }
@@ -154,6 +189,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Color(0xFF9F2E32),
         elevation: 0,
         toolbarHeight: 100,
@@ -166,7 +202,10 @@ class _HomePageState extends State<HomePage> {
             ),
             SizedBox(width: 12),
             Text(
-              "ខេមា មីក្រូហិរញ្ញវត្ថុ លីមីតធីត\nCAMMA Microfinance Limited",
+              AppLocalizations.of(context)!.homeTitle,
+              // overflow: TextOverflow.ellipsis,
+              // softWrap: false,
+              // maxLines: 1,
               style: GoogleFonts.poppins(
                 color: Colors.white,
                 fontSize: 18,
@@ -214,7 +253,8 @@ class _HomePageState extends State<HomePage> {
                 mainAxisSpacing: 12,
                 children: menus.map((item) {
                   return GestureDetector(
-                    onTap: () {
+                    onTap: () async {
+                      _checkToken();
                       final route = item['route'] as String?;
                       final arguments = item['arguments'] as bool?;
                       if (route != null) {
@@ -259,11 +299,15 @@ class _HomePageState extends State<HomePage> {
           }
         },
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(
-              icon: Icon(Icons.person), label: "My Profile"),
+              icon: Icon(Icons.home),
+              label: AppLocalizations.of(context)!.home),
           BottomNavigationBarItem(
-              icon: Icon(Icons.settings), label: "Settings"),
+              icon: Icon(Icons.person),
+              label: AppLocalizations.of(context)!.myProfile),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.settings),
+              label: AppLocalizations.of(context)!.settings),
         ],
       ),
     );
@@ -278,14 +322,17 @@ class CreditCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String currentLanguage = Localizations.localeOf(context).languageCode;
     // Extracting employee data
     final String employeeId =
         employeeData['number_employee']?.toString() ?? 'Unknown ID';
-    final String employeeName =
-        employeeData['employee_name_en'] ?? 'Unknown Name';
+    final String employeeName = currentLanguage == "en"
+        ? employeeData['employee_name_en']
+        : employeeData['employee_name_kh'];
     final String email = employeeData['email'] ?? 'No Email';
-    final String position =
-        employeeData['Position']?['name_english'] ?? 'No Position';
+    final String position = currentLanguage == "en"
+        ? employeeData['Position']['name_english']
+        : employeeData['Position']['name_khmer'];
 
     return SizedBox(
       width: double.infinity, // Makes it take full width of the screen

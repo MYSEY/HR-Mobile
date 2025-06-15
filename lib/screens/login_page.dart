@@ -30,7 +30,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         .read(authNotifierProvider.notifier)
         .login(_usernameController.text, _passwordController.text, context);
     if (success == true) {
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushNamed(context, '/home');
+      // Navigator.pushReplacementNamed(context, '/home');
     }
   }
 

@@ -4,6 +4,7 @@ import 'package:app/widgets/CommonUtils/show_confirmation_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LeaveRequestCard extends ConsumerWidget {
   final LeaveRequest leaveRequest;
@@ -130,8 +131,9 @@ class LeaveRequestCard extends ConsumerWidget {
       BuildContext context, WidgetRef ref, LeaveRequest leaveRequest) async {
     final result = await showConfirmationDialog(
       context: context,
-      title: "Confirm Deletion",
-      subtitle: "Are you sure you want to delete this leave request?",
+      title: AppLocalizations.of(context)!.confirmDeletion,
+      subtitle: AppLocalizations.of(context)!.areyousureDelete,
+      // "Are you sure you want to delete this leave request?",
     );
 
     if (result != null && result['confirmed'] == true) {
@@ -182,7 +184,7 @@ class LeaveRequestCard extends ConsumerWidget {
               children: [
                 Icon(Icons.edit, color: Colors.blue),
                 SizedBox(width: 8),
-                Text("Edit"),
+                Text(AppLocalizations.of(context)!.edit),
               ],
             ),
           ),
@@ -192,7 +194,7 @@ class LeaveRequestCard extends ConsumerWidget {
               children: [
                 Icon(Icons.delete, color: Colors.red),
                 SizedBox(width: 8),
-                Text("Delete"),
+                Text(AppLocalizations.of(context)!.delete),
               ],
             ),
           ),
@@ -205,7 +207,7 @@ class LeaveRequestCard extends ConsumerWidget {
               children: [
                 Icon(Icons.cancel, color: Colors.red),
                 SizedBox(width: 8),
-                Text("Cancel"),
+                Text(AppLocalizations.of(context)!.cancel),
               ],
             ),
           ),

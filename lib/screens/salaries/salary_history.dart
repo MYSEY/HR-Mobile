@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:app/providers/payroll_history_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SalaryHistoryPage extends ConsumerStatefulWidget {
   const SalaryHistoryPage({Key? key}) : super(key: key);
@@ -39,7 +40,7 @@ class _SalaryHistoryPage extends ConsumerState<SalaryHistoryPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Salary History',
+          AppLocalizations.of(context)!.salaryHistory,
           style: TextStyle(
             color: Colors.white,
           ),
@@ -64,7 +65,7 @@ class _SalaryHistoryPage extends ConsumerState<SalaryHistoryPage> {
                       // Year Dropdown
                       DropdownButton<int?>(
                         value: selectedYear,
-                        hint: Text("Select Year"),
+                        hint: Text(AppLocalizations.of(context)!.selectYear),
                         onChanged: (year) {
                           setState(() {
                             selectedYear = year;
@@ -73,7 +74,7 @@ class _SalaryHistoryPage extends ConsumerState<SalaryHistoryPage> {
                         items: [
                           DropdownMenuItem<int?>(
                             value: null,
-                            child: Text("All Years"),
+                            child: Text(AppLocalizations.of(context)!.allYears),
                           ),
                           ...List.generate(5, (index) {
                             final year = DateTime.now().year - index;
@@ -87,7 +88,7 @@ class _SalaryHistoryPage extends ConsumerState<SalaryHistoryPage> {
                       // Month Dropdown
                       DropdownButton<int?>(
                         value: selectedMonth,
-                        hint: Text("Select Month"),
+                        hint: Text(AppLocalizations.of(context)!.selectMonth),
                         onChanged: (month) {
                           setState(() {
                             selectedMonth = month;
@@ -96,7 +97,8 @@ class _SalaryHistoryPage extends ConsumerState<SalaryHistoryPage> {
                         items: [
                           DropdownMenuItem<int?>(
                             value: null,
-                            child: Text("All Months"),
+                            child:
+                                Text(AppLocalizations.of(context)!.allMonths),
                           ),
                           ...List.generate(12, (index) {
                             return DropdownMenuItem<int?>(
@@ -114,7 +116,9 @@ class _SalaryHistoryPage extends ConsumerState<SalaryHistoryPage> {
                 ),
                 Expanded(
                   child: filteredPayrollHistory.isEmpty
-                      ? Center(child: Text('No payroll history available'))
+                      ? Center(
+                          child: Text(
+                              AppLocalizations.of(context)!.nodataToDisplay))
                       : ListView.builder(
                           itemCount: filteredPayrollHistory.length,
                           itemBuilder: (context, index) {
@@ -134,74 +138,90 @@ class _SalaryHistoryPage extends ConsumerState<SalaryHistoryPage> {
 
                             final List<Map<String, dynamic>> earnings = [
                               {
-                                "label": "Basic Salary Received",
+                                "label": AppLocalizations.of(context)!
+                                    .basicSalaryReceived,
                                 "amount": record.basicSalary
                               },
                               {
-                                "label": "Increasement",
+                                "label":
+                                    AppLocalizations.of(context)!.increasement,
                                 "amount": record.user!.salaryIncreas
                               },
                               {
-                                "label": "Monthly/Quarterly Incentive",
+                                "label":
+                                    AppLocalizations.of(context)!.monthlyQI,
                                 "amount": record.monthlyQuarterlybonuses
                               },
                               {
                                 "label":
-                                    "Allowance(Khmer New Year / Pechum Ben)",
+                                    AppLocalizations.of(context)!.allowanceKp,
                                 "amount": record.totalKnyPhcumben
                               },
                               {
-                                "label": "Seniority Pay (Included Tax)",
+                                "label":
+                                    AppLocalizations.of(context)!.seniorityPayI,
                                 "amount": record.seniorityPayIncludedTax
                               },
                               {
-                                "label": "Seniority Pay (Excluded Tax)",
+                                "label":
+                                    AppLocalizations.of(context)!.seniorityPayE,
                                 "amount": record.seniorityPayExcludedTax
                               },
                               {
-                                "label": "Severance Pay",
+                                "label":
+                                    AppLocalizations.of(context)!.severancePay,
                                 "amount": record.totalSeverancePay
                               },
                               {
-                                "label": "Adjustment Included Tax(+/-)",
+                                "label": AppLocalizations.of(context)!
+                                    .adjustmentIncludedTax,
                                 "amount": record.adjustmentIncludeTaxe
                               },
                               {
-                                "label": "Adjustment Excluded Tax(+/-)",
+                                "label": AppLocalizations.of(context)!
+                                    .adjustmentExcludedTax,
                                 "amount": record.adjustment
                               },
                               {
-                                "label": "Phone Allowance",
+                                "label": AppLocalizations.of(context)!
+                                    .phoneAllowance,
                                 "amount": record.phoneAllowance
                               },
                               {
-                                "label": "Child Allowance",
+                                "label": AppLocalizations.of(context)!
+                                    .childAllowance,
                                 "amount": record.totalChildAllowance
                               },
                               {
-                                "label": "Parking Allowance",
+                                "label": AppLocalizations.of(context)!
+                                    .parkingAllowance,
                                 "amount": record.totalAmountCar
                               },
                               {
-                                "label": "Other Benefits",
+                                "label":
+                                    AppLocalizations.of(context)!.otherBenefits,
                                 "amount": record.otherBenefits
                               },
                             ];
                             final List<Map<String, dynamic>> deductions = [
                               {
-                                "label": "Personal Tax",
+                                "label":
+                                    AppLocalizations.of(context)!.personalTax,
                                 "amount": record.totalSalaryTaxUsd
                               },
                               {
-                                "label": "Pension Fund",
+                                "label":
+                                    AppLocalizations.of(context)!.pensionFund,
                                 "amount": record.totalPensionFund
                               },
                               {
-                                "label": "Staff Loan",
+                                "label":
+                                    AppLocalizations.of(context)!.staffLoan,
                                 "amount": record.loanAmount
                               },
                               {
-                                "label": "Other Deduction",
+                                "label": AppLocalizations.of(context)!
+                                    .otherDeduction,
                                 "amount": record.totalStaffBook
                               },
                             ];
@@ -210,13 +230,16 @@ class _SalaryHistoryPage extends ConsumerState<SalaryHistoryPage> {
                               margin: EdgeInsets.all(16),
                               child: ExpansionTile(
                                 title: Text(
-                                  'Salary for ${DateFormat('MMM-yyyy').format(record.paymentDate ?? DateTime.now())}',
+                                  AppLocalizations.of(context)!.salaryfor +
+                                      ' ${DateFormat('MMM-yyyy').format(record.paymentDate ?? DateTime.now())}',
                                 ),
-                                subtitle: Text('Net: \$${record.totalSalary}'),
+                                subtitle: Text(
+                                    AppLocalizations.of(context)!.net +
+                                        ': \$${record.totalSalary}'),
                                 children: [
                                   Table(
                                     children: [
-                                      _buildTableHeader(deductions),
+                                      _buildTableHeader(context, deductions),
                                     ],
                                   ),
                                   const Divider(height: 0),
@@ -241,9 +264,10 @@ class _SalaryHistoryPage extends ConsumerState<SalaryHistoryPage> {
                                   ),
                                   const SizedBox(height: 12),
                                   _buildSummaryRow(
-                                    "Total Earnings",
+                                    AppLocalizations.of(context)!.totalEarnings,
                                     totalEarnings,
-                                    "Total Deductions",
+                                    AppLocalizations.of(context)!
+                                        .totalDeductions,
                                     totalDeductions,
                                     bold: true,
                                   ),
@@ -251,7 +275,9 @@ class _SalaryHistoryPage extends ConsumerState<SalaryHistoryPage> {
                                   Align(
                                     alignment: Alignment.centerRight,
                                     child: Text(
-                                      "Total Net Pay: \$${record.totalSalary}",
+                                      AppLocalizations.of(context)!
+                                              .totalNetPay +
+                                          ": \$${record.totalSalary}",
                                       style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 14),
@@ -268,31 +294,36 @@ class _SalaryHistoryPage extends ConsumerState<SalaryHistoryPage> {
     );
   }
 
-  TableRow _buildTableHeader(deductions) {
-    return const TableRow(
-      decoration: BoxDecoration(color: Colors.orange),
+  TableRow _buildTableHeader(BuildContext context, deductions) {
+    return TableRow(
+      decoration: const BoxDecoration(color: Colors.orange),
       children: [
         Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            AppLocalizations.of(context)!.earning,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
+        ),
+        Padding(
           padding: EdgeInsets.all(8.0),
-          child: Text("Earning",
+          child: Text(AppLocalizations.of(context)!.amount,
               style:
                   TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         ),
         Padding(
           padding: EdgeInsets.all(8.0),
-          child: Text("Amount",
+          child: Text(AppLocalizations.of(context)!.deduction,
               style:
                   TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         ),
         Padding(
           padding: EdgeInsets.all(8.0),
-          child: Text("Deduction",
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(8.0),
-          child: Text("Amount",
+          child: Text(AppLocalizations.of(context)!.amount,
               style:
                   TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         ),

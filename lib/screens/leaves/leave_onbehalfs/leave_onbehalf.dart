@@ -7,6 +7,7 @@ import 'package:app/providers/leave_request_provider.dart';
 import 'dart:async';
 
 import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LeaveOnbehalfPage extends ConsumerStatefulWidget {
   const LeaveOnbehalfPage({Key? key}) : super(key: key);
@@ -36,8 +37,8 @@ class _LeaveOnbehalfPageState extends ConsumerState<LeaveOnbehalfPage> {
     final leaveRequests = leaveState.leaveRequests;
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Leave On Behalf',
+        title: Text(
+          AppLocalizations.of(context)!.leaveOnBehalf,
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color(0xFF9F2E32),
@@ -54,7 +55,7 @@ class _LeaveOnbehalfPageState extends ConsumerState<LeaveOnbehalfPage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: leaveRequests.isEmpty
-            ? const Center(child: Text('No data to display.'))
+            ? Center(child: Text(AppLocalizations.of(context)!.nodataToDisplay))
             : ListView.builder(
                 itemCount: leaveRequests.length,
                 itemBuilder: (context, index) {

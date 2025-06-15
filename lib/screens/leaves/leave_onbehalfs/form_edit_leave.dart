@@ -11,6 +11,7 @@ import 'package:app/models/leave_request.dart';
 import 'dart:async';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EditOnbehalfLeavePage extends ConsumerStatefulWidget {
   final LeaveRequest leaveRequest;
@@ -41,6 +42,7 @@ class _RequestLeavePageState extends ConsumerState<EditOnbehalfLeavePage> {
   String? _handoverStaff;
   String? _delegate;
   bool? viewApprove = false;
+  bool _isApplying = false;
 
   int countWeekdays(DateTime startDate, DateTime endDate) {
     int totalDays = 0;
@@ -199,6 +201,7 @@ class _RequestLeavePageState extends ConsumerState<EditOnbehalfLeavePage> {
 
   @override
   Widget build(BuildContext context) {
+    String currentLanguage = Localizations.localeOf(context).languageCode;
     final leaveState = ref.watch(leaveProvider);
     final delegates = leaveState.delegates;
     final employee = leaveState.employee;
@@ -206,7 +209,7 @@ class _RequestLeavePageState extends ConsumerState<EditOnbehalfLeavePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Edit Leave Request",
+          AppLocalizations.of(context)!.editLeaveRequest,
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Color(0xFF9F2E32),
@@ -227,7 +230,8 @@ class _RequestLeavePageState extends ConsumerState<EditOnbehalfLeavePage> {
             children: [
               DropdownButtonFormField<String>(
                 value: leaveRequest?.leaveTypeId?.toString(),
-                decoration: InputDecoration(labelText: 'Leave Type *'),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.leaveType + ' *'),
                 items: leaveTypes.map((type) {
                   return DropdownMenuItem<String>(
                     value: type.id?.toString(),
@@ -239,35 +243,40 @@ class _RequestLeavePageState extends ConsumerState<EditOnbehalfLeavePage> {
                     _leaveType = value;
                   });
                 },
-                validator: (value) =>
-                    value == null ? 'Please select a leave type' : null,
+                validator: (value) => value == null
+                    ? AppLocalizations.of(context)!.pleaseSelectAleaveType
+                    : null,
               ),
               SizedBox(height: 16.0),
               TextFormField(
                 readOnly: true,
-                decoration: InputDecoration(labelText: 'Start Date *'),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.startDate + ' *'),
                 controller: TextEditingController(
                     text: _startDate == null
                         ? ''
                         : DateFormat('yyyy-MM-dd').format(_startDate!)),
                 onTap: () => _selectDate(context, true),
-                validator: (value) =>
-                    _startDate == null ? 'Please select a start date' : null,
+                validator: (value) => _startDate == null
+                    ? AppLocalizations.of(context)!.pleaseSelectAStartDate
+                    : null,
               ),
               SizedBox(height: 16.0),
               TextFormField(
                 readOnly: true,
-                decoration: InputDecoration(labelText: 'End Date *'),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.endDate + ' *'),
                 controller: TextEditingController(
                     text: _endDate == null
                         ? ''
                         : DateFormat('yyyy-MM-dd').format(_endDate!)),
                 onTap: () => _selectDate(context, false),
-                validator: (value) =>
-                    _endDate == null ? 'Please select an end date' : null,
+                validator: (value) => _endDate == null
+                    ? AppLocalizations.of(context)!.pleaseSelectSAnEndDate
+                    : null,
               ),
               CheckboxListTile(
-                title: Text('Half Day'),
+                title: Text(AppLocalizations.of(context)!.halfDay),
                 value: _isHalfDay,
                 onChanged: (value) {
                   if (value == false) {
@@ -283,7 +292,8 @@ class _RequestLeavePageState extends ConsumerState<EditOnbehalfLeavePage> {
               if (_isHalfDay && _numberOfDays < 1)
                 DropdownButtonFormField<String>(
                   value: _halfDaySession,
-                  decoration: InputDecoration(labelText: 'Select Half Day'),
+                  decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.selectHalfDay),
                   items: ['AM', 'PM'].map((session) {
                     return DropdownMenuItem<String>(
                       value: session,
@@ -297,7 +307,7 @@ class _RequestLeavePageState extends ConsumerState<EditOnbehalfLeavePage> {
                     });
                   },
                   validator: (value) => _isHalfDay && _halfDaySession == null
-                      ? 'Please select an AM and PM'
+                      ? AppLocalizations.of(context)!.pleaseSelectAnAMandPM
                       : null,
                 ),
               if (_isHalfDay && totalDays > 1)
@@ -305,7 +315,8 @@ class _RequestLeavePageState extends ConsumerState<EditOnbehalfLeavePage> {
                   children: [
                     DropdownButtonFormField<String>(
                       value: _startDaySession,
-                      decoration: InputDecoration(labelText: 'Start Day'),
+                      decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context)!.startDay),
                       items: ['AM', 'PM'].map((session) {
                         return DropdownMenuItem<String>(
                           value: session,
@@ -321,7 +332,8 @@ class _RequestLeavePageState extends ConsumerState<EditOnbehalfLeavePage> {
                     ),
                     DropdownButtonFormField<String>(
                       value: _endDaySession,
-                      decoration: InputDecoration(labelText: 'End Day'),
+                      decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context)!.endDay),
                       items: ['AM', 'PM'].map((session) {
                         return DropdownMenuItem<String>(
                           value: session,
@@ -339,7 +351,8 @@ class _RequestLeavePageState extends ConsumerState<EditOnbehalfLeavePage> {
                 ),
               SizedBox(height: 16.0),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Number of Days'),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.numberOfDays),
                 readOnly: true,
                 controller:
                     TextEditingController(text: _numberOfDays.toString()),
@@ -347,11 +360,14 @@ class _RequestLeavePageState extends ConsumerState<EditOnbehalfLeavePage> {
               SizedBox(height: 16.0),
               DropdownButtonFormField<String>(
                 value: leaveRequest.handoverStaffId?.toString(),
-                decoration: InputDecoration(labelText: 'Handover Staff'),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.handoverStaff),
                 items: employee.map((emp) {
                   return DropdownMenuItem<String>(
                     value: emp.iD?.toString(),
-                    child: Text(emp.employeeNameEn),
+                    child: Text(currentLanguage == "en"
+                        ? emp.employeeNameEn
+                        : emp.employeeNameKh),
                   );
                 }).toList(),
                 onChanged: (value) {
@@ -363,11 +379,14 @@ class _RequestLeavePageState extends ConsumerState<EditOnbehalfLeavePage> {
               SizedBox(height: 16.0),
               DropdownButtonFormField<String>(
                 value: _delegate,
-                decoration: InputDecoration(labelText: 'Delegate'),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.textDelegate),
                 items: delegates.map((emp) {
                   return DropdownMenuItem<String>(
                     value: emp.iD?.toString(),
-                    child: Text(emp.employeeNameEn),
+                    child: Text(currentLanguage == "en"
+                        ? emp.employeeNameEn
+                        : emp.employeeNameKh),
                   );
                 }).toList(),
                 onChanged: (value) {
@@ -378,53 +397,90 @@ class _RequestLeavePageState extends ConsumerState<EditOnbehalfLeavePage> {
               ),
               SizedBox(height: 16.0),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Leave Reason *'),
+                decoration: InputDecoration(
+                    labelText:
+                        AppLocalizations.of(context)!.leaveReason + ' *'),
                 controller: TextEditingController(text: _reason.toString()),
                 maxLines: 3,
-                validator: (value) =>
-                    value!.isEmpty ? 'Please provide a reason for leave' : null,
+                validator: (value) => value!.isEmpty
+                    ? AppLocalizations.of(context)!.pleaseProvideAreasonForLeave
+                    : null,
                 onChanged: (value) {
                   _reason = value;
                 },
               ),
               SizedBox(height: 20.0),
               ElevatedButton(
-                onPressed: () async {
-                  if (_isHalfDay != false && _halfDaySession == "AM") {
-                    _startDaySession = _halfDaySession;
-                  }
-                  if (_isHalfDay != false && _halfDaySession == "PM") {
-                    _endDaySession = _halfDaySession;
-                  }
-                  if (_formKey.currentState!.validate()) {
-                    // Create the LeaveRequest object with form values
-                    LeaveRequest request = LeaveRequest(
-                      id: leaveRequest.id,
-                      leaveTypeId: int.tryParse(_leaveType ?? ""),
-                      startDate: _startDate ?? DateTime.now(),
-                      endDate: _endDate ?? DateTime.now(),
-                      startHalfDay: _startDaySession,
-                      endHalfDay: _endDaySession,
-                      reason: _reason,
-                      numberOfDay: _numberOfDays.toString(),
-                      handoverStaffId: int.tryParse(_handoverStaff ?? ""),
-                      delegateId: int.tryParse(_delegate ?? ""),
-                    );
-                    await ref
-                        .read(leaveProvider.notifier)
-                        .updateRequestLeave(request, context);
-                  }
-                },
+                onPressed: _isApplying
+                    ? null // disable the button while applying
+                    : () async {
+                        if (_isHalfDay != false && _halfDaySession == "AM") {
+                          _startDaySession = _halfDaySession;
+                        }
+                        if (_isHalfDay != false && _halfDaySession == "PM") {
+                          _endDaySession = _halfDaySession;
+                        }
+                        if (_formKey.currentState!.validate()) {
+                          setState(() {
+                            _isApplying = true;
+                          });
+                          // Create the LeaveRequest object with form values
+                          LeaveRequest request = LeaveRequest(
+                            id: leaveRequest.id,
+                            leaveTypeId: int.tryParse(_leaveType ?? ""),
+                            startDate: _startDate ?? DateTime.now(),
+                            endDate: _endDate ?? DateTime.now(),
+                            startHalfDay: _startDaySession,
+                            endHalfDay: _endDaySession,
+                            reason: _reason,
+                            numberOfDay: _numberOfDays.toString(),
+                            handoverStaffId: int.tryParse(_handoverStaff ?? ""),
+                            delegateId: int.tryParse(_delegate ?? ""),
+                          );
+                          try {
+                            final result = await ref
+                                .read(leaveProvider.notifier)
+                                .updateRequestLeave(request, context);
+                            setState(() {
+                              _isApplying = false;
+                            });
+                          } finally {
+                            setState(() {
+                              _isApplying = false;
+                            });
+                          }
+                        }
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF9F2E32),
                 ),
-                child: Text(
-                  'Edit Request',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
-                ),
+                child: _isApplying
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          ),
+                          SizedBox(width: 10),
+                          Text(
+                            'Pending...',
+                            style: TextStyle(fontSize: 16, color: Colors.white),
+                          ),
+                        ],
+                      )
+                    : Text(
+                        AppLocalizations.of(context)!.apply,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
               )
             ],
           ),

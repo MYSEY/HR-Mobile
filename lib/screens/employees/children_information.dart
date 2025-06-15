@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:app/providers/children_info_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ChildrenInforPage extends ConsumerStatefulWidget {
   final int employeeId;
@@ -64,6 +65,7 @@ class _ChildrenInforPageState extends ConsumerState<ChildrenInforPage> {
 
   @override
   Widget build(BuildContext context) {
+    String currentLanguage = Localizations.localeOf(context).languageCode;
     final dataChildren = ref.watch(childreenInforProvider);
     final args =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
@@ -72,7 +74,7 @@ class _ChildrenInforPageState extends ConsumerState<ChildrenInforPage> {
     return Scaffold(
         appBar: AppBar(
           title: Text(
-            "Children Informations",
+            AppLocalizations.of(context)!.childrenInformations,
             style: TextStyle(color: Colors.white),
           ),
           backgroundColor: const Color(0xFF9F2E32),
@@ -126,15 +128,19 @@ class _ChildrenInforPageState extends ConsumerState<ChildrenInforPage> {
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(children.Gender?.name_english ??
-                                    'No Gender'),
+                                Text(currentLanguage == "en"
+                                    ? children.Gender?.name_english ??
+                                        'No Gender '
+                                    : children.Gender?.name_khmer ??
+                                        'No Gender '),
                                 Text(
-                                  "Date of Birth: ${DateFormat('dd-MMM-yyyy').format(children.date_of_birth!)}",
+                                  AppLocalizations.of(context)!.dateOfBirth +
+                                      ':' "${DateFormat('dd-MMM-yyyy').format(children.date_of_birth!)}",
                                   // style: const TextStyle(
                                   //     fontSize: 12, color: Colors.grey),
                                 ),
-                                Text(
-                                    "Age: ${_calculateAge(children.date_of_birth!.toIso8601String())}"),
+                                Text(AppLocalizations.of(context)!.age +
+                                    ':' "${_calculateAge(children.date_of_birth!.toIso8601String())}"),
                               ],
                             ),
                           );

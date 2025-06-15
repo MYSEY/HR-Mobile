@@ -7,6 +7,7 @@ import 'package:app/providers/leave_request_provider.dart';
 import 'dart:async';
 
 import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LeaveAdmintPage extends ConsumerStatefulWidget {
   const LeaveAdmintPage({Key? key}) : super(key: key);
@@ -37,8 +38,8 @@ class _LeaveAdminPageState extends ConsumerState<LeaveAdmintPage> {
     final leaveApproves = leaveState.leaveRequests;
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Leave Admin',
+        title: Text(
+          AppLocalizations.of(context)!.leaveAdminPage,
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color(0xFF9F2E32),

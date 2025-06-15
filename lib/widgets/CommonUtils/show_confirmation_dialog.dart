@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 Future<Map<String, dynamic>?> showConfirmationDialog({
   required BuildContext context,
@@ -28,7 +29,7 @@ Future<Map<String, dynamic>?> showConfirmationDialog({
                     maxLines: null,
                     minLines: 3, // Makes it a text area
                     decoration: InputDecoration(
-                      labelText: 'Enter your remark',
+                      labelText: AppLocalizations.of(context)!.enterYourRemark,
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -45,14 +46,15 @@ Future<Map<String, dynamic>?> showConfirmationDialog({
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, {'confirmed': false}),
-                child: Text('No'),
+                child: Text(AppLocalizations.of(context)!.no),
               ),
               TextButton(
                 onPressed: () {
                   if (apRemark == true) {
                     if (inputController.text.trim().isEmpty) {
                       setState(() {
-                        errorMessage = 'This field is required';
+                        errorMessage =
+                            AppLocalizations.of(context)!.thisFieldIsRequired;
                       });
                     } else {
                       setState(() {
@@ -73,7 +75,7 @@ Future<Map<String, dynamic>?> showConfirmationDialog({
                     );
                   }
                 },
-                child: Text('Yes'),
+                child: Text(AppLocalizations.of(context)!.yes),
               ),
             ],
           );

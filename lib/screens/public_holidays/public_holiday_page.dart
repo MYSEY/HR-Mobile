@@ -1,6 +1,7 @@
 import 'package:app/providers/public_holiday_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PublicHolidaysPage extends ConsumerStatefulWidget {
   const PublicHolidaysPage({Key? key}) : super(key: key);
@@ -22,7 +23,7 @@ class _PublicHolidaysPageState extends ConsumerState<PublicHolidaysPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Public Holidays",
+        title: Text(AppLocalizations.of(context)!.publicHolidays,
             style: TextStyle(color: Colors.white)),
         centerTitle: true,
         backgroundColor: Color(0xFF9F2E32),
@@ -36,7 +37,7 @@ class _PublicHolidaysPageState extends ConsumerState<PublicHolidaysPage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: publicHolidays.isEmpty
-            ? const Center(child: Text('No data to display.'))
+            ? Center(child: Text(AppLocalizations.of(context)!.nodataToDisplay))
             // const Center(child: CircularProgressIndicator())
             : ListView.builder(
                 itemCount: publicHolidays.length,

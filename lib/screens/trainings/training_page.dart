@@ -3,6 +3,7 @@ import 'package:app/providers/training_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class TrainingListPage extends ConsumerStatefulWidget {
   const TrainingListPage({Key? key}) : super(key: key);
@@ -52,8 +53,8 @@ class _TrainingPageState extends ConsumerState<TrainingListPage> {
     final staffTrainings = ref.watch(trainingProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Training List',
+        title: Text(
+          AppLocalizations.of(context)!.trainingList,
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color(0xFF9F2E32),
@@ -65,7 +66,7 @@ class _TrainingPageState extends ConsumerState<TrainingListPage> {
         ),
       ),
       body: staffTrainings.isEmpty
-          ? const Center(child: Text('No trainings available'))
+          ? Center(child: Text(AppLocalizations.of(context)!.nodataToDisplay))
           : ListView.builder(
               itemCount: staffTrainings.length,
               itemBuilder: (context, index) {
@@ -99,12 +100,14 @@ class _TrainingPageState extends ConsumerState<TrainingListPage> {
                       ),
                     ),
                     subtitle: Text(
-                      'Start Date: ${staffTraining.training?.startDate != null ? DateFormat('dd-MM-yyyy').format(staffTraining.training!.startDate!) : 'N/A'} - '
-                      '${staffTraining.training?.endDate != null ? DateFormat('dd-MM-yyyy').format(staffTraining.training!.endDate!) : 'N/A'}',
+                      AppLocalizations.of(context)!.startDate +
+                          ': ${staffTraining.training?.startDate != null ? DateFormat('dd-MM-yyyy').format(staffTraining.training!.startDate!) : 'N/A'} - '
+                              '${staffTraining.training?.endDate != null ? DateFormat('dd-MM-yyyy').format(staffTraining.training!.endDate!) : 'N/A'}',
                     ),
                     children: [
                       ListTile(
-                        title: const Text('Type of Training'),
+                        title:
+                            Text(AppLocalizations.of(context)!.typeOfTraining),
                         trailing: Text(
                           staffTraining.training?.trainingType == 2
                               ? "External"
@@ -116,19 +119,19 @@ class _TrainingPageState extends ConsumerState<TrainingListPage> {
                         ),
                       ),
                       ListTile(
-                        title: const Text('Price/Unit'),
+                        title: Text(AppLocalizations.of(context)!.priceUnit),
                         trailing: Text('\$${price.toStringAsFixed(2)}'),
                       ),
                       ListTile(
-                        title: const Text('Discount Fee'),
+                        title: Text(AppLocalizations.of(context)!.discountFee),
                         trailing: Text('\$${discount.toStringAsFixed(2)}'),
                       ),
                       ListTile(
-                        title: const Text('Total'),
+                        title: Text(AppLocalizations.of(context)!.total),
                         trailing: Text('\$${totalPrice.toStringAsFixed(2)}'),
                       ),
                       ListTile(
-                        title: const Text('Duration Term'),
+                        title: Text(AppLocalizations.of(context)!.durationTerm),
                         trailing: Text(
                           durationMonth,
                           style: const TextStyle(

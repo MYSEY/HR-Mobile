@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app/providers/leave_request_provider.dart';
 import 'dart:async';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:intl/intl.dart';
 
@@ -74,42 +75,42 @@ class _LeaveRequestPageState extends ConsumerState<LeaveRequestPage>
     // Update the leaveCategories list based on the current leaveAllocation
     leaveCategories = [
       {
-        "title": "Annual Leave",
+        "title": AppLocalizations.of(context)!.annualLeave,
         "count": leaveAllocation?.totalAnnualLeave ?? 0,
         "color": const Color.fromARGB(255, 160, 164, 165),
       },
       {
-        "title": "Sick Leave",
+        "title": AppLocalizations.of(context)!.sickLeave,
         "count": leaveAllocation?.totalSickLeave ?? 0,
         "color": const Color.fromARGB(255, 160, 164, 165),
       },
       {
-        "title": "Special Leave",
+        "title": AppLocalizations.of(context)!.specialLeave,
         "count": leaveAllocation?.totalSpecialLeave ?? 0,
         "color": const Color.fromARGB(255, 160, 164, 165),
       },
       {
-        "title": "Unpaid Leave",
+        "title": AppLocalizations.of(context)!.unpaidLeave,
         "count": leaveAllocation?.totalUnpaidLeave ?? 0,
         "color": const Color.fromARGB(255, 160, 164, 165),
       },
       {
-        "title": "Long Sick Leave",
+        "title": AppLocalizations.of(context)!.longSickLeave,
         "count": 0,
         "color": const Color.fromARGB(255, 160, 164, 165),
       },
       {
-        "title": "Year 1",
+        "title": AppLocalizations.of(context)!.year + " 1",
         "count": leaveAllocation?.year1 ?? 0,
         "color": const Color.fromARGB(255, 160, 164, 165),
       },
       {
-        "title": "Year 2",
+        "title": AppLocalizations.of(context)!.year + " 2",
         "count": leaveAllocation?.year2 ?? 0,
         "color": const Color.fromARGB(255, 160, 164, 165),
       },
       {
-        "title": "Year 3",
+        "title": AppLocalizations.of(context)!.year + " 3",
         "count": leaveAllocation?.year3 ?? 0,
         "color": const Color.fromARGB(255, 160, 164, 165),
       },
@@ -117,8 +118,8 @@ class _LeaveRequestPageState extends ConsumerState<LeaveRequestPage>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Leaves',
+        title: Text(
+          AppLocalizations.of(context)!.leaves,
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color(0xFF9F2E32),
@@ -193,14 +194,16 @@ class _LeaveRequestPageState extends ConsumerState<LeaveRequestPage>
             ),
 
             // Leave Request Info Header
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Leave Request Info",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    AppLocalizations.of(context)!.leaveRequestInfo,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                 ],
               ),

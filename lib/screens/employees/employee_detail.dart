@@ -6,6 +6,7 @@ import 'package:app/providers/employee_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EmployeeDetailPage extends ConsumerStatefulWidget {
   final int employeeId;
@@ -71,7 +72,7 @@ class _EmployeeDetailPageState extends ConsumerState<EmployeeDetailPage> {
           return Scaffold(
             appBar: AppBar(
               title: Text(
-                "Employee Details",
+                AppLocalizations.of(context)!.employeeDetail,
                 style: TextStyle(color: Colors.white),
               ),
               backgroundColor: const Color(0xFF9F2E32),
@@ -94,13 +95,25 @@ class _EmployeeDetailPageState extends ConsumerState<EmployeeDetailPage> {
                       : _buildProfileHeader(snapshot.data!),
                   _buildWorkInformation(snapshot.data!),
                   _buildExpandableSection(
-                      "Personal Informations", snapshot.data!, "", 0),
-                  _buildExpandableSection("Experience Informations", null,
-                      "/experience", snapshot.data!.id),
-                  _buildExpandableSection("Children Informations", null,
-                      "/children/infor", snapshot.data!.id),
-                  _buildExpandableSection("Employment & Education", null,
-                      "/education", snapshot.data!.id),
+                      AppLocalizations.of(context)!.personalInformations,
+                      snapshot.data!,
+                      "",
+                      0),
+                  _buildExpandableSection(
+                      AppLocalizations.of(context)!.experienceInformations,
+                      null,
+                      "/experience",
+                      snapshot.data!.id),
+                  _buildExpandableSection(
+                      AppLocalizations.of(context)!.childrenInformations,
+                      null,
+                      "/children/infor",
+                      snapshot.data!.id),
+                  _buildExpandableSection(
+                      AppLocalizations.of(context)!.employmentEducation,
+                      null,
+                      "/education",
+                      snapshot.data!.id),
                 ],
               ),
             ),
@@ -111,8 +124,8 @@ class _EmployeeDetailPageState extends ConsumerState<EmployeeDetailPage> {
   }
 
   Widget _buildProfileHeader(singleEmployee) {
+    String currentLanguage = Localizations.localeOf(context).languageCode;
     Employee data = singleEmployee;
-
     return Container(
       padding: EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -123,9 +136,11 @@ class _EmployeeDetailPageState extends ConsumerState<EmployeeDetailPage> {
         children: [
           _buildProfilePicture(data.profile),
           SizedBox(height: 10),
-          Text("${data.employeeNameEn}",
+          Text(
+              "${currentLanguage == "en" ? data.employeeNameEn : data.employeeNameKh}",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          Text("${data.position!.name_english}",
+          Text(
+              "${currentLanguage == "en" ? data.position!.name_english : data.position!.name_khmer}",
               style: TextStyle(fontSize: 16, color: Colors.grey[600])),
           SizedBox(height: 10),
           Row(
@@ -139,7 +154,7 @@ class _EmployeeDetailPageState extends ConsumerState<EmployeeDetailPage> {
               const SizedBox(width: 20),
               _buildIconButton(
                 Icons.email,
-                "Email",
+                AppLocalizations.of(context)!.email,
                 () => _launchEmailWithFallback(context, data.email!),
               ),
               const SizedBox(width: 20),
@@ -192,6 +207,7 @@ class _EmployeeDetailPageState extends ConsumerState<EmployeeDetailPage> {
   }
 
   Widget _buildWorkInformation(singleEmployee) {
+    String currentLanguage = Localizations.localeOf(context).languageCode;
     Employee data = singleEmployee;
     String statusLoan = data.isLoan == 0 ? "No" : "Yes";
 
@@ -210,19 +226,25 @@ class _EmployeeDetailPageState extends ConsumerState<EmployeeDetailPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("WORK INFORMATION",
+          Text(AppLocalizations.of(context)!.workInformation,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           Divider(),
-          _buildInfoRow("Employee Type", "Full Time", Colors.black),
-          _buildInfoRow("Employee Id", "${data.numberEmployee}", Colors.black),
-          _buildInfoRow("Date Of Joining",
+          _buildInfoRow(AppLocalizations.of(context)!.employeeType,
+              AppLocalizations.of(context)!.fullTime, Colors.black),
+          _buildInfoRow(AppLocalizations.of(context)!.employeeId,
+              "${data.numberEmployee}", Colors.black),
+          _buildInfoRow(AppLocalizations.of(context)!.dateOfJoining,
               "${formatDate(data.dateOfCommencement)}", Colors.black),
-          _buildInfoRow("Office Location",
-              "${data.branch?.branch_name_en ?? 'N/A'}", Colors.black),
           _buildInfoRow(
-              "Role Access", "${data.role?.role_name ?? 'N/A'}", Colors.black),
-          _buildInfoRow("Loan", statusLoan, statusColor),
-          _buildInfoRow("Status", statusEmployee, Colors.black),
+              AppLocalizations.of(context)!.officeLocation,
+              "${currentLanguage == "en" ? data.branch?.branch_name_en ?? 'N/A' : data.branch?.branch_name_kh ?? 'N/A'}",
+              Colors.black),
+          _buildInfoRow(AppLocalizations.of(context)!.roleAccess,
+              "${data.role?.role_name ?? 'N/A'}", Colors.black),
+          _buildInfoRow(
+              AppLocalizations.of(context)!.loan, statusLoan, statusColor),
+          _buildInfoRow(AppLocalizations.of(context)!.status, statusEmployee,
+              Colors.black),
         ],
       ),
     );
@@ -244,6 +266,7 @@ class _EmployeeDetailPageState extends ConsumerState<EmployeeDetailPage> {
 
   Widget _buildExpandableSection(
       String title, Employee? dataPersonal, String url, int? argument) {
+    String currentLanguage = Localizations.localeOf(context).languageCode;
     if (dataPersonal == null) {
       return Card(
         margin: EdgeInsets.symmetric(vertical: 5, horizontal: 16),
@@ -268,13 +291,18 @@ class _EmployeeDetailPageState extends ConsumerState<EmployeeDetailPage> {
           ),
         ),
         children: [
-          _buildInfoRow("Email", dataPersonal.email ?? "N/A", Colors.black),
-          _buildInfoRow("Date of Birth", formatDate(dataPersonal.dateOfBirth),
+          _buildInfoRow(AppLocalizations.of(context)!.email,
+              dataPersonal.email ?? "N/A", Colors.black),
+          _buildInfoRow(AppLocalizations.of(context)!.dateOfBirth,
+              formatDate(dataPersonal.dateOfBirth), Colors.black),
+          _buildInfoRow(AppLocalizations.of(context)!.gender,
+              dataPersonal.option?.name_english ?? "N/A", Colors.black),
+          _buildInfoRow(
+              AppLocalizations.of(context)!.marriedStatus,
+              currentLanguage == "en"
+                  ? dataPersonal.MarriedStatus?.name_english ?? "N/A"
+                  : dataPersonal.MarriedStatus?.name_khmer ?? "N/A",
               Colors.black),
-          _buildInfoRow("Gender", dataPersonal.option?.name_english ?? "N/A",
-              Colors.black),
-          _buildInfoRow("Married Status",
-              dataPersonal.MarriedStatus?.name_english ?? "N/A", Colors.black),
         ],
       ),
     );

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 // *** block home page ***
 import 'package:app/screens/home_page.dart';
 // *** block settings ***
@@ -53,20 +55,57 @@ void main() async {
   ));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   final String initialRoute;
 
-  MyApp({required this.initialRoute});
+  const MyApp({Key? key, required this.initialRoute}) : super(key: key);
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  Locale _locale = const Locale('en'); // default to English
+
+  void _setLocale(Locale locale) {
+    setState(() {
+      _locale = locale;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLocale(); // Load saved locale from SharedPreferences
+  }
+
+  Future<void> _loadLocale() async {
+    final prefs = await SharedPreferences.getInstance();
+    final langCode = prefs.getString('language_code') ?? 'en';
+    setState(() {
+      _locale = Locale(langCode);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Employee Management',
+      // theme: ThemeData(primarySwatch: Colors.blue),
+      initialRoute: widget.initialRoute,
+      locale: _locale,
+      supportedLocales: const [Locale('en'), Locale('km')],
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        fontFamily: _locale.languageCode == 'km' ? 'kh_Battambang' : null,
       ),
-      initialRoute: initialRoute, // Set based on authentication check
-      navigatorObservers: [AuthNavigatorObserver()], // Add the observer here
+      navigatorObservers: [AuthNavigatorObserver()],
       routes: {
         '/login': (context) => LoginPage(),
         '/confirm': (context) {
@@ -75,7 +114,7 @@ class MyApp extends StatelessWidget {
           return ConfirmPasswordPage(employeeId: employeeId);
         },
         '/home': (context) => HomePage(),
-        '/setting': (context) => SettingsPage(),
+        '/setting': (context) => SettingsPage(onLocaleChanged: _setLocale),
         '/change/password': (context) => ChangePasswordPage(),
         '/edit/profile': (context) => EditProfilePage(),
         '/leaves/admin': (context) => LeaveAdmintPage(),
@@ -138,7 +177,7 @@ class MyApp extends StatelessWidget {
 /// Authentication check logic
 Future<bool> _checkAuthentication() async {
   final prefs = await SharedPreferences.getInstance();
-  final token = prefs.getString('authToken');
+  final token = prefs.getString('token');
 
   if (token == null) {
     return false; // No token, not authenticated

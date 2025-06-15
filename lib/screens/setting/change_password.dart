@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app/providers/auth_provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ChangePasswordPage extends ConsumerStatefulWidget {
   @override
@@ -61,7 +62,8 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Change Password', style: TextStyle(color: Colors.white)),
+        title: Text(AppLocalizations.of(context)!.changePassword,
+            style: TextStyle(color: Colors.white)),
         backgroundColor: Color(0xFF9F2E32),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -80,7 +82,7 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
               TextFormField(
                 controller: _newPasswordController,
                 decoration: InputDecoration(
-                  labelText: 'New Password',
+                  labelText: AppLocalizations.of(context)!.newPassword,
                   border: OutlineInputBorder(),
                   suffixIcon: IconButton(
                     icon: Icon(_obscureNewPassword
@@ -92,10 +94,12 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
                 obscureText: _obscureNewPassword,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your new password';
+                    return AppLocalizations.of(context)!
+                        .pleaseEnterYourNewPassword;
                   }
                   if (value.length < 8) {
-                    return 'Password must be at least 8 characters long';
+                    return AppLocalizations.of(context)!
+                        .passwordMustBeAtLeast8CharactersLong;
                   }
                   return null;
                 },
@@ -104,7 +108,7 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
               TextFormField(
                 controller: _confirmPasswordController,
                 decoration: InputDecoration(
-                  labelText: 'Confirm Password',
+                  labelText: AppLocalizations.of(context)!.confirmPassword,
                   border: OutlineInputBorder(),
                   suffixIcon: IconButton(
                     icon: Icon(_obscureConfirmPassword
@@ -116,10 +120,11 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
                 obscureText: _obscureConfirmPassword,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please confirm your password';
+                    return AppLocalizations.of(context)!
+                        .pleaseConfirmYourPassword;
                   }
                   if (value != _newPasswordController.text) {
-                    return 'Passwords do not match';
+                    return AppLocalizations.of(context)!.passwordsDoNotMatch;
                   }
                   return null;
                 },
@@ -129,7 +134,7 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _submit,
-                  child: Text('Change Password'),
+                  child: Text(AppLocalizations.of(context)!.changePassword),
                 ),
               ),
             ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:app/providers/payroll_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PayrollListPage extends ConsumerStatefulWidget {
   const PayrollListPage({Key? key}) : super(key: key);
@@ -33,7 +34,7 @@ class _SalaryPage extends ConsumerState<PayrollListPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Salary',
+          AppLocalizations.of(context)!.salary,
           style: TextStyle(
             color: Colors.white,
           ),
@@ -74,7 +75,7 @@ class _SalaryPage extends ConsumerState<PayrollListPage> {
                   gradient: LinearGradient(
                     colors: [
                       Color.fromARGB(255, 159, 91, 3),
-                      Color(0xFFFFBB60)
+                      Color(0xFFFFBB60),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -84,29 +85,34 @@ class _SalaryPage extends ConsumerState<PayrollListPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Payment Date: ${DateFormat('MMM-yyyy').format(payroll?.paymentDate ?? DateTime.now())}",
+                      AppLocalizations.of(context)!.paymentDate +
+                          ": ${DateFormat('MMM-yyyy').format(payroll?.paymentDate ?? DateTime.now())}",
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      "Basic Salary: ${NumberFormat.currency(symbol: "\$").format(payroll?.basicSalary ?? 0)}",
+                      AppLocalizations.of(context)!.basicSalary +
+                          ": ${NumberFormat.currency(symbol: "\$").format(payroll?.basicSalary ?? 0)}",
                       // style:
                       //     TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      "Gross Salary: ${NumberFormat.currency(symbol: "\$").format(payroll?.totalGrossSalary ?? 0)}",
+                      AppLocalizations.of(context)!.grossSalary +
+                          ": ${NumberFormat.currency(symbol: "\$").format(payroll?.totalGrossSalary ?? 0)}",
                       // style:
                       //     TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     // SizedBox(height: 8),
                     Text(
-                      'Deductions: ${NumberFormat.currency(symbol: "\$").format(deduction)}',
+                      AppLocalizations.of(context)!.deductions +
+                          ': ${NumberFormat.currency(symbol: "\$").format(deduction)}',
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     // SizedBox(height: 8),
                     Text(
-                      'Net Salary: ${NumberFormat.currency(symbol: "\$").format(payroll?.totalSalary ?? 0)}',
+                      AppLocalizations.of(context)!.netSalary +
+                          ': ${NumberFormat.currency(symbol: "\$").format(payroll?.totalSalary ?? 0)}',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -120,31 +126,31 @@ class _SalaryPage extends ConsumerState<PayrollListPage> {
             SizedBox(height: 20),
             // Detailed Breakdown
             Text(
-              'Breakdown',
+              AppLocalizations.of(context)!.breakdown,
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             Divider(),
             ListTile(
               leading: Icon(Icons.money),
-              title: Text('Basic Pay'),
+              title: Text(AppLocalizations.of(context)!.basicPay),
               trailing: Text(
                   '\$${payroll?.basicSalary?.toString() ?? '0.00'}'), // Use ?. and ?? '0.00'
             ),
             ListTile(
               leading: Icon(Icons.money),
-              title: Text('Allowance'),
+              title: Text(AppLocalizations.of(context)!.allowance),
               trailing: Text(
                   '\$${payroll?.totalChildAllowance?.toString() ?? '0.00'}'), // Use ?. and ?? '0.00'
             ),
             ListTile(
               leading: Icon(Icons.money_off),
-              title: Text('Deductions'),
+              title: Text(AppLocalizations.of(context)!.deductions),
               trailing: Text(
                   '${NumberFormat.currency(symbol: "\$").format(deduction)}'), // Replace with actual deductions if available
             ),
             ListTile(
               leading: Icon(Icons.attach_money),
-              title: Text('Bonuses'),
+              title: Text(AppLocalizations.of(context)!.bonuses),
               trailing:
                   Text('\$${payroll?.totalSeverancePay?.toString() ?? '0.00'}'),
             ),
@@ -155,7 +161,7 @@ class _SalaryPage extends ConsumerState<PayrollListPage> {
                 onPressed: () {
                   Navigator.pushReplacementNamed(context, '/salaries/history');
                 },
-                child: Text('View Salary History'),
+                child: Text(AppLocalizations.of(context)!.viewSalaryHistory),
               ),
             ),
           ],

@@ -9,8 +9,26 @@ import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:path_provider/path_provider.dart';
 
 class ApiService {
-  final Dio _dio = Dio(BaseOptions(baseUrl: 'http://10.0.2.2:9876/api'));
-  // final Dio _dio = Dio(BaseOptions(baseUrl: 'http://192.168.101.19:9876/api'));
+  // final Dio _dio = Dio(BaseOptions(baseUrl: 'http://10.0.2.2:9876/api'));
+  // final Dio _dio = Dio(BaseOptions(baseUrl: 'https://192.168.101.19:9876/api'));
+  late final Dio _dio;
+  ApiService() {
+    _dio = Dio(BaseOptions(
+      baseUrl: 'https://192.168.101.19:9876/api',
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    ));
+
+    // Set bad certificate callback to accept self-signed certs
+    (_dio.httpClientAdapter as dynamic).onHttpClientCreate =
+        (HttpClient client) {
+      client.badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+      return client;
+    };
+  }
 
   final username = 'user';
   final password = 'pass';

@@ -5,6 +5,7 @@ import 'package:app/widgets/CommonUtils/show_confirmation_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LeaveRequestApproveCard extends ConsumerWidget {
   final LeaveRequest leaveRequest;
@@ -14,6 +15,7 @@ class LeaveRequestApproveCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    String currentLanguage = Localizations.localeOf(context).languageCode;
     return Card(
       margin: EdgeInsets.all(8),
       child: Padding(
@@ -22,7 +24,7 @@ class LeaveRequestApproveCard extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '${leaveRequest.user?.employee_name_en ?? "N/A"}',
+              '${currentLanguage == "en" ? leaveRequest.user?.employee_name_en ?? "N/A" : leaveRequest.user?.employee_name_kh ?? "N/A"}',
               style: TextStyle(
                 color: Colors.blue,
                 fontWeight: FontWeight.bold,
@@ -32,25 +34,27 @@ class LeaveRequestApproveCard extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Type: ${leaveRequest.leaveType?.name ?? "N/A"}'),
-                Text('No. of Days: ${leaveRequest.numberOfDay ?? "N/A"}'),
+                Text(AppLocalizations.of(context)!.type +
+                    ': ${leaveRequest.leaveType?.name ?? "N/A"}'),
+                Text(AppLocalizations.of(context)!.noOfDays +
+                    ': ${leaveRequest.numberOfDay ?? "N/A"}'),
               ],
             ),
             SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                    'From: ${DateFormat('dd-MMM-yyyy').format(leaveRequest.startDate) ?? "N/A"}'),
-                Text(
-                    'To: ${DateFormat('dd-MMM-yyyy').format(leaveRequest.endDate) ?? "N/A"}'),
+                Text(AppLocalizations.of(context)!.from +
+                    ': ${DateFormat('dd-MMM-yyyy').format(leaveRequest.startDate) ?? "N/A"}'),
+                Text(AppLocalizations.of(context)!.to +
+                    ': ${DateFormat('dd-MMM-yyyy').format(leaveRequest.endDate) ?? "N/A"}'),
               ],
             ),
             SizedBox(height: 4),
             Row(
               // mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Handover Staff: '),
+                Text(AppLocalizations.of(context)!.handoverStaff + ': '),
                 Text(
                   '${leaveRequest.handoverStaff?.employee_name_en ?? "N/A"}',
                   style: TextStyle(
@@ -60,7 +64,8 @@ class LeaveRequestApproveCard extends ConsumerWidget {
                 ),
               ],
             ),
-            Text('Reason: ${leaveRequest.reason}'),
+            Text(AppLocalizations.of(context)!.reason +
+                ': ${leaveRequest.reason}'),
             SizedBox(height: 4),
             Row(
               mainAxisAlignment:
@@ -68,16 +73,16 @@ class LeaveRequestApproveCard extends ConsumerWidget {
               children: [
                 button(
                   child: Text(
-                    'Approve',
+                    AppLocalizations.of(context)!.approve,
                     style: TextStyle(
                       color: Colors.green,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   onPressed: () async {
-                    final title = "Confirm Approve";
-                    final subtitle =
-                        "Are you sure you want to approve this leave request?";
+                    final title = AppLocalizations.of(context)!.confirmApprove;
+                    final subtitle = AppLocalizations.of(context)!.areyousure;
+                    // "Are you sure you want to approve this leave request?";
                     final result = await showConfirmationDialog(
                       context: context,
                       title: title,
@@ -105,16 +110,17 @@ class LeaveRequestApproveCard extends ConsumerWidget {
                 const SizedBox(width: 8),
                 button(
                   child: Text(
-                    'Reject',
+                    AppLocalizations.of(context)!.reject,
                     style: TextStyle(
                       color: Colors.red,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   onPressed: () async {
-                    final title = "Confirm Reject";
+                    final title = AppLocalizations.of(context)!.confirmReject;
                     final subtitle =
-                        "Are you sure you want to reject this leave request?";
+                        AppLocalizations.of(context)!.areyousureReject;
+                    // "Are you sure you want to reject this leave request?";
                     final result = await showConfirmationDialog(
                       context: context,
                       title: title,

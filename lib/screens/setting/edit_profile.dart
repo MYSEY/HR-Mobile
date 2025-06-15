@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EditProfilePage extends StatefulWidget {
   @override
@@ -27,7 +28,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Profile', style: TextStyle(color: Colors.white)),
+        title: Text(AppLocalizations.of(context)!.editProfile,
+            style: TextStyle(color: Colors.white)),
         backgroundColor: Color(0xFF9F2E32),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -57,7 +59,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       radius: 18,
                       backgroundColor: Colors.blue,
                       child: IconButton(
-                        icon: Icon(Icons.edit, color: Colors.white, size: 18),
+                        icon: Icon(Icons.camera_alt,
+                            color: Colors.white, size: 18),
                         onPressed: _pickImage,
                       ),
                     ),
@@ -71,7 +74,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 // Save the updated profile
                 print('Profile updated with image: $_profileImage');
               },
-              child: Text('Save Profile'),
+              child: Text(AppLocalizations.of(context)!.saveProfile),
             ),
           ],
         ),

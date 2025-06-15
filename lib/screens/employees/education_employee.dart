@@ -5,6 +5,7 @@ import 'package:app/models/employee.dart';
 import 'package:app/providers/education_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EducationPage extends ConsumerStatefulWidget {
   final int employeeId;
@@ -43,6 +44,7 @@ class _EducationPageState extends ConsumerState<EducationPage> {
 
   @override
   Widget build(BuildContext context) {
+    String currentLanguage = Localizations.localeOf(context).languageCode;
     final dataEducations = ref.watch(educationProvider);
     final args =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
@@ -51,7 +53,7 @@ class _EducationPageState extends ConsumerState<EducationPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Employment & Education",
+          AppLocalizations.of(context)!.employmentEducation,
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color(0xFF9F2E32),
@@ -92,17 +94,19 @@ class _EducationPageState extends ConsumerState<EducationPage> {
                         final experience = dataEducations[index];
                         return ListTile(
                           title: Text(
-                            "Date: ${DateFormat('dd-MMM-yyyy').format(experience.start_date!)} - ${DateFormat('dd-MMM-yyyy').format(experience.end_date!)}",
+                            AppLocalizations.of(context)!.date +
+                                ':' "${DateFormat('dd-MMM-yyyy').format(experience.start_date!)} - ${DateFormat('dd-MMM-yyyy').format(experience.end_date!)}",
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text("Institution: ${experience.school}"),
-                              Text(
-                                  "Field of Study: ${experience.FieldofStudy!.name_english}"),
-                              Text(
-                                  "Degree	: ${experience.Degree!.name_english}"),
+                              Text(AppLocalizations.of(context)!.institution +
+                                  ':' "${experience.school}"),
+                              Text(AppLocalizations.of(context)!.fieldOfStudy +
+                                  ':' "${currentLanguage == "en" ? experience.FieldofStudy!.name_english : experience.FieldofStudy!.name_khmer}"),
+                              Text(AppLocalizations.of(context)!.degree +
+                                  ':' "${currentLanguage == "en" ? experience.Degree!.name_english : experience.Degree!.name_khmer}"),
                             ],
                           ),
                         );

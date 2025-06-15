@@ -1,11 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
+  final void Function(Locale) onLocaleChanged;
+
+  const SettingsPage({super.key, required this.onLocaleChanged});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
   Future<void> _clearUserData() async {
     final prefs = await SharedPreferences.getInstance();
     // Clear all stored data
     await prefs.clear();
+  }
+
+  int? _languageId = 1; // 1 = English, 2 = Khmer
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    String currentLanguage = Localizations.localeOf(context).languageCode;
+    setState(() {
+      _languageId = currentLanguage == 'km' ? 2 : 1;
+    });
+  }
+
+  void _onLanguageChange(int? value) {
+    if (value == null) return;
+    setState(() {
+      _languageId = value;
+    });
+
+    if (value == 1) {
+      widget.onLocaleChanged(const Locale('en'));
+    } else if (value == 2) {
+      widget.onLocaleChanged(const Locale('km'));
+    }
   }
 
   void _logout(BuildContext context) async {
@@ -22,12 +61,62 @@ class SettingsPage extends StatelessWidget {
     Navigator.pushReplacementNamed(context, '/login');
   }
 
+  void _showLanguageBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(AppLocalizations.of(context)!.selectLanguage + ':',
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                  RadioListTile<int>(
+                    title: const Text('ភាសាខ្មែរ'),
+                    value: 2,
+                    groupValue: _languageId,
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() => _languageId = value);
+                        Navigator.pop(context);
+                        _onLanguageChange(value); // call your original handler
+                      }
+                    },
+                  ),
+                  RadioListTile<int>(
+                    title: const Text('English'),
+                    value: 1,
+                    groupValue: _languageId,
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() => _languageId = value);
+                        Navigator.pop(context);
+                        _onLanguageChange(value); // call your original handler
+                      }
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Settings',
+          AppLocalizations.of(context)!.settings,
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Color(0xFF9F2E32),
@@ -44,7 +133,7 @@ class SettingsPage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              "Account",
+              AppLocalizations.of(context)!.account,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
@@ -53,14 +142,14 @@ class SettingsPage extends StatelessWidget {
           ),
           ListTile(
             leading: Icon(Icons.person),
-            title: Text("Edit Profile"),
+            title: Text(AppLocalizations.of(context)!.changeProfile),
             onTap: () {
               Navigator.pushReplacementNamed(context, '/edit/profile');
             },
           ),
           ListTile(
             leading: Icon(Icons.lock),
-            title: Text("Change Password"),
+            title: Text(AppLocalizations.of(context)!.changePassword),
             onTap: () {
               Navigator.pushReplacementNamed(context, '/change/password');
             },
@@ -95,7 +184,7 @@ class SettingsPage extends StatelessWidget {
           ),
           SwitchListTile(
             title: Text("Email Notifications"),
-            value: false,
+            value: true,
             onChanged: (bool value) {
               // Handle switch logic
             },
@@ -103,68 +192,55 @@ class SettingsPage extends StatelessWidget {
           ),
           Divider(),
 
-          // Privacy Section
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              "Privacy",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-          ),
-          ListTile(
-            leading: Icon(Icons.privacy_tip),
-            title: Text("Privacy Policy"),
-            onTap: () {
-              // Navigate to privacy policy
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.shield),
-            title: Text("Terms and Conditions"),
-            onTap: () {
-              // Navigate to terms and conditions
-            },
-          ),
-          Divider(),
+          // // Privacy Section
+          // Padding(
+          //   padding: const EdgeInsets.all(16.0),
+          //   child: Text(
+          //     "Privacy",
+          //     style: TextStyle(
+          //       fontWeight: FontWeight.bold,
+          //       fontSize: 18,
+          //     ),
+          //   ),
+          // ),
+          // ListTile(
+          //   leading: Icon(Icons.privacy_tip),
+          //   title: Text("Privacy Policy"),
+          //   onTap: () {
+          //     // Navigate to privacy policy
+          //   },
+          // ),
+          // ListTile(
+          //   leading: Icon(Icons.shield),
+          //   title: Text("Terms and Conditions"),
+          //   onTap: () {
+          //     // Navigate to terms and conditions
+          //   },
+          // ),
+          // Divider(),
 
-          // App Settings Section
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              "App Settings",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-          ),
           ListTile(
-            leading: Icon(Icons.language),
-            title: Text("Language"),
-            subtitle: Text("English"),
-            onTap: () {
-              // Navigate to language settings
-            },
+            leading: const Icon(Icons.language),
+            title: Text(AppLocalizations.of(context)!.languages),
+            trailing: Text(_languageId == 1 ? 'English' : 'ខ្មែរ'),
+            onTap: () => _showLanguageBottomSheet(context),
           ),
-          ListTile(
-            leading: Icon(Icons.palette),
-            title: Text("Theme"),
-            subtitle: Text("Light"),
-            onTap: () {
-              // Navigate to theme settings
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.update),
-            title: Text("Check for Updates"),
-            onTap: () {
-              // Handle check for updates
-            },
-          ),
-          Divider(),
+          // ListTile(
+          //   leading: Icon(Icons.palette),
+          //   title: Text("Theme"),
+          //   subtitle: Text("Light"),
+          //   onTap: () {
+          //     // Navigate to theme settings
+          //   },
+          // ),
+          // ListTile(
+          //   leading: Icon(Icons.update),
+          //   title: Text("Check for Updates"),
+          //   onTap: () {
+          //     // Handle check for updates
+          //   },
+          // ),
+          // Divider(),
 
           // Logout Section
           Padding(
@@ -175,7 +251,7 @@ class SettingsPage extends StatelessWidget {
               ),
               onPressed: () => _logout(context),
               child: Text(
-                "Log Out",
+                AppLocalizations.of(context)!.logOut,
                 style: TextStyle(color: Colors.white),
               ),
             ),

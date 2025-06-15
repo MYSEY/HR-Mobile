@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class MyProfilePage extends ConsumerStatefulWidget {
   @override
@@ -87,7 +88,7 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage> {
           return Scaffold(
             appBar: AppBar(
               title: Text(
-                "My Profile",
+                AppLocalizations.of(context)!.myProfile,
                 style: TextStyle(color: Colors.white),
               ),
               backgroundColor: const Color(0xFF9F2E32),
@@ -102,17 +103,31 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage> {
               child: Column(
                 children: [
                   !snapshot.hasData
-                      ? const Center(child: Text('No leave request available'))
-                      : _buildProfileHeader(snapshot.data!),
+                      ? Center(
+                          child: Text(
+                              AppLocalizations.of(context)!.nodataToDisplay))
+                      : _buildProfileHeader(context, snapshot.data!),
                   _buildWorkInformation(snapshot.data!),
                   _buildExpandableSection(
-                      "Personal Informations", snapshot.data!, "", 0),
-                  _buildExpandableSection("Experience Informations", null,
-                      "/experience", snapshot.data!.id),
-                  _buildExpandableSection("Children Informations", null,
-                      "/children/infor", employeeId),
-                  _buildExpandableSection("Employment & Education", null,
-                      "/education", snapshot.data!.id),
+                      AppLocalizations.of(context)!.personalInformations,
+                      snapshot.data!,
+                      "",
+                      0),
+                  _buildExpandableSection(
+                      AppLocalizations.of(context)!.experienceInformations,
+                      null,
+                      "/experience",
+                      snapshot.data!.id),
+                  _buildExpandableSection(
+                      AppLocalizations.of(context)!.childrenInformations,
+                      null,
+                      "/children/infor",
+                      employeeId),
+                  _buildExpandableSection(
+                      AppLocalizations.of(context)!.employmentEducation,
+                      null,
+                      "/education",
+                      snapshot.data!.id),
                 ],
               ),
             ),
@@ -122,7 +137,8 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage> {
     );
   }
 
-  Widget _buildProfileHeader(singleEmployee) {
+  Widget _buildProfileHeader(BuildContext context, singleEmployee) {
+    String currentLanguage = Localizations.localeOf(context).languageCode;
     Employee data = singleEmployee;
 
     return Container(
@@ -135,34 +151,35 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage> {
         children: [
           _buildProfilePicture(data.profile),
           SizedBox(height: 10),
-          Text("${data.employeeNameEn}",
+          Text(
+              "${currentLanguage == 'en' ? data.employeeNameEn : data.employeeNameKh}",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           Text("${data.position!.name_english}",
               style: TextStyle(fontSize: 16, color: Colors.grey[600])),
           SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildIconButton(
-                Icons.phone,
-                "${data.personalPhoneNumber}",
-                () => _launchPhone(data.personalPhoneNumber),
-              ),
-              const SizedBox(width: 20),
-              _buildIconButton(
-                Icons.email,
-                "Email",
-                () => _launchEmailWithFallback(context, data.email!),
-              ),
-              const SizedBox(width: 20),
-              _buildIconButton(
-                Icons.account_tree,
-                "Org Chart",
-                () {
-                  // Implement org chart navigation if needed
-                },
-              ),
-            ],
+            // children: [
+            //   _buildIconButton(
+            //     Icons.phone,
+            //     "${data.personalPhoneNumber}",
+            //     () => _launchPhone(data.personalPhoneNumber),
+            //   ),
+            //   const SizedBox(width: 20),
+            //   _buildIconButton(
+            //     Icons.email,
+            //     AppLocalizations.of(context)!.email,
+            //     () => _launchEmailWithFallback(context, data.email!),
+            //   ),
+            //   const SizedBox(width: 20),
+            //   _buildIconButton(
+            //     Icons.account_tree,
+            //     "Org Chart",
+            //     () {
+            //       // Implement org chart navigation if needed
+            //     },
+            //   ),
+            // ],
           ),
         ],
       ),
@@ -222,19 +239,23 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("WORK INFORMATION",
+          Text(AppLocalizations.of(context)!.workInformation,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           Divider(),
-          _buildInfoRow("Employee Type", "Full Time", Colors.black),
-          _buildInfoRow("Employee Id", "${data.numberEmployee}", Colors.black),
-          _buildInfoRow("Date Of Joining",
+          _buildInfoRow(AppLocalizations.of(context)!.employeeType,
+              AppLocalizations.of(context)!.fullTime, Colors.black),
+          _buildInfoRow(AppLocalizations.of(context)!.employeeId,
+              "${data.numberEmployee}", Colors.black),
+          _buildInfoRow(AppLocalizations.of(context)!.dateOfJoining,
               "${formatDate(data.dateOfCommencement)}", Colors.black),
-          _buildInfoRow("Office Location",
+          _buildInfoRow(AppLocalizations.of(context)!.officeLocation,
               "${data.branch?.branch_name_en ?? 'N/A'}", Colors.black),
+          _buildInfoRow(AppLocalizations.of(context)!.roleAccess,
+              "${data.role?.role_name ?? 'N/A'}", Colors.black),
           _buildInfoRow(
-              "Role Access", "${data.role?.role_name ?? 'N/A'}", Colors.black),
-          _buildInfoRow("Loan", statusLoan, statusColor),
-          _buildInfoRow("Status", statusEmployee, Colors.black),
+              AppLocalizations.of(context)!.loan, statusLoan, statusColor),
+          _buildInfoRow(AppLocalizations.of(context)!.status, statusEmployee,
+              Colors.black),
         ],
       ),
     );
@@ -283,12 +304,13 @@ class _MyProfilePageState extends ConsumerState<MyProfilePage> {
           ),
         ),
         children: [
-          _buildInfoRow("Email", dataPersonal.email ?? "N/A", Colors.black),
-          _buildInfoRow("Date of Birth", formatDate(dataPersonal.dateOfBirth),
-              Colors.black),
-          _buildInfoRow("Gender", dataPersonal.option?.name_english ?? "N/A",
-              Colors.black),
-          _buildInfoRow("Married Status",
+          _buildInfoRow(AppLocalizations.of(context)!.email,
+              dataPersonal.email ?? "N/A", Colors.black),
+          _buildInfoRow(AppLocalizations.of(context)!.dateOfBirth,
+              formatDate(dataPersonal.dateOfBirth), Colors.black),
+          _buildInfoRow(AppLocalizations.of(context)!.gender,
+              dataPersonal.option?.name_english ?? "N/A", Colors.black),
+          _buildInfoRow(AppLocalizations.of(context)!.marriedStatus,
               dataPersonal.MarriedStatus?.name_english ?? "N/A", Colors.black),
         ],
       ),

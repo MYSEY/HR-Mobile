@@ -5,6 +5,7 @@ import 'package:app/models/employee.dart';
 import 'package:app/providers/experience_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ExperiencePage extends ConsumerStatefulWidget {
   final int employeeId;
@@ -43,6 +44,7 @@ class _ExperiencePageState extends ConsumerState<ExperiencePage> {
 
   @override
   Widget build(BuildContext context) {
+    String currentLanguage = Localizations.localeOf(context).languageCode;
     final dataExperience = ref.watch(experienceProvider);
     final args =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
@@ -51,7 +53,7 @@ class _ExperiencePageState extends ConsumerState<ExperiencePage> {
     return Scaffold(
         appBar: AppBar(
           title: Text(
-            "Experience Informations",
+            AppLocalizations.of(context)!.experienceInformations,
             style: TextStyle(color: Colors.white),
           ),
           backgroundColor: const Color(0xFF9F2E32),
@@ -92,19 +94,23 @@ class _ExperiencePageState extends ConsumerState<ExperiencePage> {
                           final experience = dataExperience[index];
                           return ListTile(
                             title: Text(
-                              "Date: ${DateFormat('dd-MMM-yyyy').format(experience.start_date!)} - ${DateFormat('dd-MMM-yyyy').format(experience.end_date!)}",
+                              AppLocalizations.of(context)!.date +
+                                  ':' "${DateFormat('dd-MMM-yyyy').format(experience.start_date!)} - ${DateFormat('dd-MMM-yyyy').format(experience.end_date!)}",
                               style:
                                   const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                    "Company Name: ${experience.company_name}"),
-                                Text(
-                                    "Employment Type: ${experience.type!.name_english}"),
-                                Text("Job Position	: ${experience.position!}"),
-                                Text("Location	: ${experience.location!}"),
+                                Text(AppLocalizations.of(context)!.companyName +
+                                    ':' "${experience.company_name}"),
+                                Text(AppLocalizations.of(context)!
+                                        .employmentType +
+                                    ':' "${currentLanguage == "en" ? experience.type!.name_english : experience.type!.name_khmer}"),
+                                Text(AppLocalizations.of(context)!.jobPosition +
+                                    ':' "${experience.position!}"),
+                                Text(AppLocalizations.of(context)!.location +
+                                    ':' "${experience.location!}"),
                               ],
                             ),
                           );
@@ -185,13 +191,23 @@ class _ExperiencePageState extends ConsumerState<ExperiencePage> {
         ));
   }
 
-  TableRow _buildTableHeader() {
-    return const TableRow(
+  TableRow _buildTableHeader(BuildContext context) {
+    return TableRow(
       decoration: BoxDecoration(color: Colors.orange),
       children: [
         Padding(
+            padding: EdgeInsets.all(10.0),
+            child: Text(
+              AppLocalizations.of(context)!.date,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 10,
+              ),
+            )),
+        Padding(
           padding: EdgeInsets.all(10.0),
-          child: Text("Date",
+          child: Text(AppLocalizations.of(context)!.companyName,
               style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -199,7 +215,7 @@ class _ExperiencePageState extends ConsumerState<ExperiencePage> {
         ),
         Padding(
           padding: EdgeInsets.all(10.0),
-          child: Text("Company Name",
+          child: Text(AppLocalizations.of(context)!.employmentType,
               style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -207,7 +223,7 @@ class _ExperiencePageState extends ConsumerState<ExperiencePage> {
         ),
         Padding(
           padding: EdgeInsets.all(10.0),
-          child: Text("Employment Type",
+          child: Text(AppLocalizations.of(context)!.jobPosition,
               style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -215,15 +231,7 @@ class _ExperiencePageState extends ConsumerState<ExperiencePage> {
         ),
         Padding(
           padding: EdgeInsets.all(10.0),
-          child: Text("Job Position",
-              style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 10)),
-        ),
-        Padding(
-          padding: EdgeInsets.all(10.0),
-          child: Text("Location",
+          child: Text(AppLocalizations.of(context)!.location,
               style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

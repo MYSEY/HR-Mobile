@@ -5,6 +5,7 @@ import 'package:app/widgets/CommonUtils/show_confirmation_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LeaveOnbehalfCard extends ConsumerWidget {
   final LeaveRequest leaveRequest;
@@ -16,8 +17,8 @@ class LeaveOnbehalfCard extends ConsumerWidget {
       BuildContext context, WidgetRef ref, LeaveRequest leaveRequest) async {
     final result = await showConfirmationDialog(
       context: context,
-      title: "Confirm Deletion",
-      subtitle: "Are you sure you want to delete this leave request?",
+      title: AppLocalizations.of(context)!.confirmDeletion,
+      subtitle: AppLocalizations.of(context)!.areyousureDelete,
     );
 
     if (result != null && result['confirmed'] == true) {
@@ -57,24 +58,26 @@ class LeaveOnbehalfCard extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Type: ${leaveRequest.leaveType?.name ?? "N/A"}'),
-                Text('No. of Days: ${leaveRequest.numberOfDay ?? "N/A"}'),
+                Text(AppLocalizations.of(context)!.type +
+                    ': ${leaveRequest.leaveType?.name ?? "N/A"}'),
+                Text(AppLocalizations.of(context)!.noOfDays +
+                    ': ${leaveRequest.numberOfDay ?? "N/A"}'),
               ],
             ),
             SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                    'From: ${DateFormat('dd-MMM-yyyy').format(leaveRequest.startDate) ?? "N/A"}'),
-                Text(
-                    'To: ${DateFormat('dd-MMM-yyyy').format(leaveRequest.endDate) ?? "N/A"}'),
+                Text(AppLocalizations.of(context)!.from +
+                    ': ${DateFormat('dd-MMM-yyyy').format(leaveRequest.startDate) ?? "N/A"}'),
+                Text(AppLocalizations.of(context)!.to +
+                    ': ${DateFormat('dd-MMM-yyyy').format(leaveRequest.endDate) ?? "N/A"}'),
               ],
             ),
             SizedBox(height: 4),
             Row(
               children: [
-                Text('Handover Staff: '),
+                Text(AppLocalizations.of(context)!.handoverStaff + ': '),
                 Text(
                   '${leaveRequest.handoverStaff?.employee_name_en ?? "N/A"}',
                   style: TextStyle(
@@ -84,7 +87,8 @@ class LeaveOnbehalfCard extends ConsumerWidget {
                 ),
               ],
             ),
-            Text('Reason: ${leaveRequest.reason}'),
+            Text(AppLocalizations.of(context)!.reason +
+                ': ${leaveRequest.reason}'),
             SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -94,7 +98,7 @@ class LeaveOnbehalfCard extends ConsumerWidget {
                     leaveRequest.status == "approved_lm") ...[
                   button(
                     child: Text(
-                      'Delete',
+                      AppLocalizations.of(context)!.delete,
                       style: TextStyle(
                         color: Colors.red,
                         fontWeight: FontWeight.bold,
