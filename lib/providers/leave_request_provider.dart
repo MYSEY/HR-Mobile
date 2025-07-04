@@ -259,6 +259,31 @@ class LeaveNotifier extends StateNotifier<LeaveRequestsState> {
     }
   }
 
+  Future<void> cancelRequestLeave(
+      LeaveRequest LeaveRequest, BuildContext context) async {
+    final jsonRequest = LeaveRequest.toJson();
+    try {
+      final response =
+          await ref.read(authProvider).cancelRequestLeave(jsonRequest);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        if (context.mounted) {
+          CommonUtils.showTopSnackbar(
+              context, 'Cancel successfully', Colors.green);
+          Navigator.pushReplacementNamed(context, '/leaves/list');
+        }
+      } else {
+        print('Error Response Data: ${response.data}');
+        throw Exception('Failed to create leave request');
+      }
+    } catch (e) {
+      print('Error creating leave request: $e');
+      if (context.mounted) {
+        CommonUtils.showTopSnackbar(
+            context, 'Error creating leave request', Colors.red);
+      }
+    }
+  }
+
   Future<void> approveLeave(
       LeaveRequest LeaveRequest, BuildContext context) async {
     final jsonRequest = LeaveRequest.toJson();
@@ -266,7 +291,7 @@ class LeaveNotifier extends StateNotifier<LeaveRequestsState> {
       final response = await ref.read(authProvider).approveLeave(jsonRequest);
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (context.mounted) {
-          Navigator.pushReplacementNamed(context, '/leaves/list');
+          Navigator.pushReplacementNamed(context, '/leaves/admin');
           CommonUtils.showTopSnackbar(
               context, 'Approve successfully', Colors.green);
         }
@@ -290,7 +315,7 @@ class LeaveNotifier extends StateNotifier<LeaveRequestsState> {
       final response = await ref.read(authProvider).rejectLeave(jsonRequest);
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (context.mounted) {
-          Navigator.pushReplacementNamed(context, '/leaves/list');
+          Navigator.pushReplacementNamed(context, '/leaves/admin');
           CommonUtils.showTopSnackbar(
               context, 'Reject successfully', Colors.green);
         }

@@ -34,7 +34,7 @@ class _SalaryPage extends ConsumerState<PayrollListPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          AppLocalizations.of(context)!.salary,
+          AppLocalizations.of(context)!.cbPage,
           style: TextStyle(
             color: Colors.white,
           ),
@@ -46,20 +46,20 @@ class _SalaryPage extends ConsumerState<PayrollListPage> {
             Navigator.pushReplacementNamed(context, '/home');
           },
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.history, color: Colors.white),
-            onPressed: () {
-              // Add history functionality
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.download, color: Colors.white),
-            onPressed: () {
-              // Add download payslip functionality
-            },
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: Icon(Icons.history, color: Colors.white),
+        //     onPressed: () {
+        //       // Add history functionality
+        //     },
+        //   ),
+        //   IconButton(
+        //     icon: Icon(Icons.download, color: Colors.white),
+        //     onPressed: () {
+        //       // Add download payslip functionality
+        //     },
+        //   ),
+        // ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

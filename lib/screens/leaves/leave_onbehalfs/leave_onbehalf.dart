@@ -38,7 +38,7 @@ class _LeaveOnbehalfPageState extends ConsumerState<LeaveOnbehalfPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          AppLocalizations.of(context)!.leaveOnBehalf,
+          AppLocalizations.of(context)!.leaveOnBehalfPage,
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color(0xFF9F2E32),

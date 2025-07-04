@@ -13,7 +13,7 @@ class LeaveRequest {
   final DateTime? approvedDate;
   final String? nextApprover;
   final String? approvedBy;
-  final String? status;
+  String? status;
   final String? numberOfDay;
   final String? totalAnnualLeave;
   final String? totalSickLeave;
@@ -121,6 +121,7 @@ class LeaveRequest {
       'end_date': endDate.toIso8601String(),
       'end_half_day': endHalfDay ?? '',
       'number_of_day': numberOfDay,
+      'status': status ?? '',
       'reason': reason ?? '',
       'remark': remark ?? '',
     };

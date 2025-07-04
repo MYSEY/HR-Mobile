@@ -56,7 +56,7 @@ class _LeaveAdminPageState extends ConsumerState<LeaveAdmintPage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: leaveApproves.isEmpty
-            ? const Center(child: Text('No leaves available for approval'))
+            ? Center(child: Text(AppLocalizations.of(context)!.nodataToDisplay))
             : ListView.builder(
                 itemCount: leaveApproves.length,
                 itemBuilder: (context, index) {

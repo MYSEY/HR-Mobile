@@ -119,7 +119,7 @@ class _LeaveRequestPageState extends ConsumerState<LeaveRequestPage>
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          AppLocalizations.of(context)!.leaves,
+          AppLocalizations.of(context)!.leaveEmployeePage,
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color(0xFF9F2E32),
@@ -210,12 +210,14 @@ class _LeaveRequestPageState extends ConsumerState<LeaveRequestPage>
             ),
 
             leaveRequests.isEmpty
-                ? const Center(child: Text('No leave request available'))
+                ? Center(
+                    child: Text(AppLocalizations.of(context)!.nodataToDisplay))
                 : Expanded(
                     child: ListView.builder(
                       itemCount: leaveRequests.length,
                       itemBuilder: (context, index) {
                         final leaveRequest = leaveRequests[index];
+                        print("leaveRequest: $leaveRequest");
                         return LeaveRequestCard(
                           leaveRequest: leaveRequest,
                           id: leaveRequest.id.toString(),
@@ -224,6 +226,11 @@ class _LeaveRequestPageState extends ConsumerState<LeaveRequestPage>
                           startDate: leaveRequest.startDate,
                           endDate: leaveRequest.endDate,
                           leaveType: leaveRequest.leaveType?.name ?? '',
+                          handover:
+                              leaveRequest.handoverStaff?.employee_name_en ??
+                                  '',
+                          reason: leaveRequest.reason ?? '',
+                          remark: leaveRequest.remark ?? '',
                           status: leaveRequest.status ?? '',
                         );
                       },

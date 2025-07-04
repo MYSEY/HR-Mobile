@@ -10,11 +10,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
   // final Dio _dio = Dio(BaseOptions(baseUrl: 'http://10.0.2.2:9876/api'));
-  // final Dio _dio = Dio(BaseOptions(baseUrl: 'https://192.168.101.19:9876/api'));
+  // baseUrl: 'https://192.168.101.19:9876/api'; // # Access internet inside
   late final Dio _dio;
   ApiService() {
     _dio = Dio(BaseOptions(
-      baseUrl: 'https://192.168.101.19:9876/api',
+      baseUrl: 'https://192.168.101.19:9876/api', // # Access internet inside
+      // baseUrl: 'https://hr.camma.com.kh:9876//api', // # Access internet outside
       headers: {
         'accept': 'application/json',
         'Content-Type': 'application/json',
@@ -366,6 +367,26 @@ class ApiService {
     try {
       return await _dio.delete(
         '/leave/request/delete',
+        data: data,
+        options: Options(
+          headers: {
+            'Authorization': 'bearer $token',
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+    } catch (e) {
+      throw Exception('Error delete leave request: $e');
+    }
+  }
+
+  Future<Response> cancelRequestLeave(Map<String, dynamic> data) async {
+    // Encode credentials for Basic Authentication
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    try {
+      return await _dio.post(
+        '/leave/request/cancel',
         data: data,
         options: Options(
           headers: {

@@ -129,7 +129,7 @@ class _HomePageState extends State<HomePage> {
             if (perm['url'] == "leaves/replcement" && perm['is_view'] == 1) {
               menus.add({
                 'icon': Icons.add_circle,
-                'label': AppLocalizations.of(context)!.leaveOnBehelf,
+                'label': AppLocalizations.of(context)!.leaveOnBehalfMenu,
                 'route': '/leaves/onbehalf',
                 'arguments': viewApprove,
               });
@@ -212,27 +212,27 @@ class _HomePageState extends State<HomePage> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            Spacer(),
-            Stack(
-              children: [
-                Icon(Icons.notifications_none, color: Colors.white, size: 28),
-                Positioned(
-                  right: 0,
-                  top: 2,
-                  child: Container(
-                    padding: EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Color(0xFF9F2E32),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      "3",
-                      style: TextStyle(color: Colors.white, fontSize: 10),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            // Spacer(),
+            // Stack(
+            //   children: [
+            //     Icon(Icons.notifications_none, color: Colors.white, size: 28),
+            //     Positioned(
+            //       right: 0,
+            //       top: 2,
+            //       child: Container(
+            //         padding: EdgeInsets.all(4),
+            //         decoration: BoxDecoration(
+            //           color: Color(0xFF9F2E32),
+            //           shape: BoxShape.circle,
+            //         ),
+            //         child: Text(
+            //           "3",
+            //           style: TextStyle(color: Colors.white, fontSize: 10),
+            //         ),
+            //       ),
+            //     ),
+            //   ],
+            // ),
           ],
         ),
       ),
@@ -416,11 +416,11 @@ class MenuItem extends StatelessWidget {
           Text(
             label,
             textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: Colors.black87,
-            ),
+            // style: GoogleFonts.poppins(
+            //   fontSize: 12,
+            //   fontWeight: FontWeight.w500,
+            //   color: Colors.black87,
+            // ),
           ),
         ],
       ),

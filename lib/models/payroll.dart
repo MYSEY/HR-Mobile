@@ -1,6 +1,6 @@
 class Payroll {
   final int? id;
-  final int employeeId;
+  final int? employeeId;
   final double? basicSalary;
   final double? totalGrossSalary;
   final DateTime? paymentDate;
@@ -43,8 +43,8 @@ class Payroll {
     this.totalGrossSalary = 0.0,
     this.paymentDate,
     this.totalChildAllowance = 0.0,
-    this.phoneAllowance,
-    this.monthlyQuarterlybonuses,
+    this.phoneAllowance = 0.0,
+    this.monthlyQuarterlybonuses = 0.0,
     this.totalKnyPhcumben = 0.0,
     this.annualIncentiveBonus = 0.0,
     this.seniorityPayIncludedTax = 0.0,
@@ -66,9 +66,9 @@ class Payroll {
     this.seniorityPayExcludedTax = 0,
     this.totalAmountReduced = 0.0,
     this.totalSalary = 0.0,
-    this.exchangeRate,
-    this.adjustment,
-    this.adjustmentIncludeTaxe,
+    this.exchangeRate = '0',
+    this.adjustment = '0',
+    this.adjustmentIncludeTaxe = '0',
     this.createdBy,
     this.updatedBy,
     this.deletedAt,
@@ -78,7 +78,7 @@ class Payroll {
   factory Payroll.fromJson(Map<String, dynamic> json) {
     return Payroll(
       id: json['id'] as int?,
-      employeeId: json['employee_id'] as int,
+      employeeId: json['employee_id'] as int?,
       basicSalary: _parseDouble(json['basic_salary']),
       totalGrossSalary: _parseDouble(json['total_gross_salary']),
       // paymentDate: DateTime.parse(
@@ -104,14 +104,14 @@ class Payroll {
       totalAmountCar: _parseDouble(json['total_amount_car']),
       totalStaffBook: _parseDouble(json['total_staff_book']),
       baseSalaryReceivedUsd: _parseDouble(json['base_salary_received_usd']),
-      baseSalaryReceivedRiel: json['base_salary_received_riel'] as String,
+      baseSalaryReceivedRiel: json['base_salary_received_riel'] as String?,
       spouse: json['spouse'] as int?,
       children: json['children'] as int?,
-      totalChargesReduced: json['total_charges_reduced'] as String,
-      totalTaxBaseRiel: json['total_tax_base_riel'] as String,
+      totalChargesReduced: json['total_charges_reduced'] as String?,
+      totalTaxBaseRiel: json['total_tax_base_riel'] as String?,
       totalRate: json['total_rate'] as int?,
       totalSalaryTaxUsd: _parseDouble(json['total_salary_tax_usd']),
-      totalSalaryTaxRiel: json['total_salary_tax_riel'] as String,
+      totalSalaryTaxRiel: json['total_salary_tax_riel'] as String?,
       seniorityPayExcludedTax: _parseDouble(json['seniority_pay_excluded_tax']),
       totalAmountReduced: _parseDouble(json['total_amount_reduced']),
       totalSalary: _parseDouble(json['total_salary']),
@@ -128,12 +128,10 @@ class Payroll {
   }
 
   static double? _parseDouble(dynamic value) {
-    if (value is String) {
-      return double.tryParse(value) ?? 0.0;
-    } else if (value is num) {
-      return value.toDouble();
-    }
-    return null;
+    if (value == null) return 0.0;
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    if (value is num) return value.toDouble();
+    return 0.0;
   }
 
   @override
@@ -222,35 +220,26 @@ class Payroll {
 class User {
   final double? preSalary;
   final double? basicSalary;
-  final int? salaryIncreas;
+  final double? salaryIncreas;
 
   User({
-    this.preSalary = 0.0,
-    this.basicSalary = 0.0,
-    this.salaryIncreas = 0,
+    this.preSalary,
+    this.basicSalary,
+    this.salaryIncreas,
   });
-  static double? _parseDouble(dynamic value) {
-    if (value is String) {
-      return double.tryParse(value) ?? 0.0;
-    } else if (value is num) {
-      return value.toDouble();
-    }
-    return null;
-  }
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       preSalary: _parseDouble(json['pre_salary']),
       basicSalary: _parseDouble(json['basic_salary']),
-      salaryIncreas: json['salary_increas'] as int?,
+      salaryIncreas: _parseDouble(json['salary_increas']),
     );
   }
-  @override
-  String toString() {
-    return 'User('
-        'preSalary: $preSalary,'
-        'basicSalary: $basicSalary,'
-        'salaryIncreas: $salaryIncreas,'
-        ')';
+
+  static double? _parseDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    if (value is num) return value.toDouble();
+    return 0.0;
   }
 }

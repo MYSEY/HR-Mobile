@@ -66,10 +66,12 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   Locale _locale = const Locale('en'); // default to English
+  String _fontFamily = '';
 
-  void _setLocale(Locale locale) {
+  void _setLocale(Locale locale, String fontFamily) {
     setState(() {
       _locale = locale;
+      _fontFamily = fontFamily;
     });
   }
 
@@ -103,7 +105,7 @@ class _MyAppState extends State<MyApp> {
       ],
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        fontFamily: _locale.languageCode == 'km' ? 'kh_Battambang' : null,
+        fontFamily: _fontFamily,
       ),
       navigatorObservers: [AuthNavigatorObserver()],
       routes: {
